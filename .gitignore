@@ -51,7 +51,7 @@ Temporary Items
 .svn
 
 # c++
-.o
+*.o
 #IAR temp files
 *.pbi
 *.pbd
