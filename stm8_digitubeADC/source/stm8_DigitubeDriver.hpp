@@ -1,4 +1,3 @@
-
 /**
  *  Work with Common Cathode 7 Seg digitube
  *
@@ -37,11 +36,6 @@ typedef enum
    GPIO_PIN_ALL = ((uint8_t) 0xFF) /*!< All pins selected */
 } GPIO_Pin_TypeDef;
 
-
-
-
-
-
 #define Segment_A_Port  GPIOD
 #define Segment_A_Pin   GPIO_PIN_5
 
@@ -78,14 +72,6 @@ typedef enum
 #define Segment_Digit4_Port  GPIOD
 #define Segment_Digit4_Pin   GPIO_PIN_2
 
-
-
-
-
-
-
-
-
 typedef enum
 {
    GPIO_MODE_IN_FL_NO_IT = (uint8_t) 0x00, /*!< Input floating, no external interrupt */
@@ -102,18 +88,9 @@ typedef enum
    GPIO_MODE_OUT_PP_HIGH_SLOW = (uint8_t) 0xD0 /*!< Output push-pull, high level, 2MHz */
 } GPIO_Mode_TypeDef;
 
-
-
 // Connect a 4 digit digitube
 static const uint8_t MAX_DIGIT = 4;
 static const uint8_t MAX_Segment = 7;  // A - G  , Dp doesn't count
-
-
-
-
-
-
-
 
 class STM8_DigitubeDriver
 {
@@ -124,19 +101,27 @@ class STM8_DigitubeDriver
       GPIO_Pin_TypeDef pin;
    };
 
-   static const  Port_Pin Segment_A, Segment_B, Segment_C, Segment_D, Segment_E, Segment_F, Segment_G, Segment_Dp;
-   static const  Port_Pin Digit1, Digit2, Digit3, Digit4;
+   static const Port_Pin Segment_A, Segment_B, Segment_C, Segment_D, Segment_E, Segment_F,
+         Segment_G, Segment_Dp;
+   static const Port_Pin Digit1, Digit2, Digit3, Digit4;
 
-   const static  Port_Pin ArrayPortPin[MAX_Segment];
+   const static Port_Pin ArrayPortPin[MAX_Segment];
    //={Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A    } ;
-
 
    static void tim4_Interupt_Init(void);
 
    static void gpioInitPushPull(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef GPIO_Pin);
 
-   static void displaySegA();
-
+   static void setDisplay0();
+   static void setDisplay1();
+   static void setDisplay2();
+   static void setDisplay3();
+   static void setDisplay4();
+   static void setDisplay5();
+   static void setDisplay6();
+   static void setDisplay7();
+   static void setDisplay8();
+   static void setDisplay9();
 
 public:
 
@@ -144,6 +129,7 @@ public:
 
    static void stm8_Gpio_Write_Low(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins);
    static void stm8_Gpio_Write_High(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins);
-
+   //set the 7 segment digit, so current enabled digitN show the digit
+   static void setDisplayDigit(uint8_t digit);
 };
 
