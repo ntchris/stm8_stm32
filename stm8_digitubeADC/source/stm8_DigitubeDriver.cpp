@@ -32,17 +32,88 @@ const STM8_DigitubeDriver::Port_Pin STM8_DigitubeDriver::Digit4 =
 
 //STM8_DigitubeDriver::Port_Pin ArrayPortPin[MAX_Segment]={Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A    } ;
 
+const STM8_DigitubeDriver::Port_Pin STM8_DigitubeDriver::ArrayDigit[MAX_DIGIT] =
+{ STM8_DigitubeDriver::Digit1, STM8_DigitubeDriver::Digit2, STM8_DigitubeDriver::Digit3,
+      STM8_DigitubeDriver::Digit4 };
+uint8_t STM8_DigitubeDriver::currentDigitIndex = 0;
+
+#define TIM4_IT_UPDATE      ((uint8_t)0x01)
+
 inline void STM8_DigitubeDriver::tim4_Interupt_Init(void)
 {
+   // prescaler
+   TIM4->PSCR = (uint8_t) (TIM4_PRESCALER_2);
+
+   // The auto reload count
+   TIM4->ARR = (uint8_t) (0xff);
+
+   //Enable
+   TIM4->CR1 |= TIM4_CR1_CEN;
+   // Enable source
+   TIM4->IER |= (uint8_t) TIM4_IT_UPDATE;
+
+   enableInterrupts();
 
 }
 
-void STM8_DigitubeDriver::stm8_Gpio_Write_Low(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins)
+
+
+inline void STM8_DigitubeDriver::stm8_TIM4_Interrupt(void)
+{
+   static uint8_t count = 0;
+   const uint8_t PWM_LOOP = STM8_DigitubeDriver::Full_Cycle / STM8_DigitubeDriver::Duty_PWM;
+   static bool isOff = false;
+   static const STM8_DigitubeDriver::Port_Pin *currentDigit = &ArrayDigit[currentDigitIndex];
+   if (count == 0)
+   {
+      // turn ON
+      STM8_DigitubeDriver::stm8_Gpio_Write_Low(currentDigit->port, currentDigit->pin);
+      isOff = false;
+      count++;
+      return;
+   }
+   else
+   {
+      // should be off. counting PWM counter
+      count++;
+      //current digit off
+      if (!isOff)
+      {
+         STM8_DigitubeDriver::stm8_Gpio_Write_High(currentDigit->port, currentDigit->pin);
+         isOff = true;
+      }
+      if (count >= PWM_LOOP)
+      {
+         count = 0;
+         //========================
+         // refresh digits
+         currentDigitIndex++;
+         if( currentDigitIndex>=MAX_DIGIT)
+         {
+            currentDigitIndex=0;
+         }
+         currentDigit = &ArrayDigit[currentDigitIndex];
+      }
+
+   }
+
+}
+
+INTERRUPT_HANDLER(TIM4_UPD_OVF_IRQHandler, 23)
+{
+   // clear interupt flag otherwise it reenter this again and again
+   TIM4->SR1 = (uint8_t) (~TIM4_IT_UPDATE);
+   STM8_DigitubeDriver::stm8_TIM4_Interrupt();
+
+}
+
+inline void STM8_DigitubeDriver::stm8_Gpio_Write_Low(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins)
 {
    GPIOx->ODR &= (uint8_t) (~PortPins);
 }
 
-void STM8_DigitubeDriver::stm8_Gpio_Write_High(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins)
+inline void STM8_DigitubeDriver::stm8_Gpio_Write_High(GPIO_TypeDef* GPIOx,
+      GPIO_Pin_TypeDef PortPins)
 {
    GPIOx->ODR |= (uint8_t) PortPins;
 }
@@ -53,6 +124,12 @@ void STM8_DigitubeDriver::gpioInitPushPull(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef
    GPIOx->CR2 &= (uint8_t) (~(GPIO_Pin));
    GPIOx->DDR |= (uint8_t) GPIO_Pin;  // Output mode
    GPIOx->CR1 |= (uint8_t) GPIO_Pin;  //push pull
+}
+
+void STM8_DigitubeDriver::stm8_init(void)
+{
+   STM8_DigitubeDriver::stm8_Pins_For_DigitubeInit();
+   STM8_DigitubeDriver::tim4_Interupt_Init();
 }
 
 void STM8_DigitubeDriver::stm8_Pins_For_DigitubeInit(void)
@@ -79,9 +156,6 @@ void STM8_DigitubeDriver::stm8_Pins_For_DigitubeInit(void)
 
 }
 
-
-
-
 inline void STM8_DigitubeDriver::setDisplay0()
 {
    STM8_DigitubeDriver::stm8_Gpio_Write_High(Segment_A_Port, Segment_A_Pin);
@@ -95,8 +169,6 @@ inline void STM8_DigitubeDriver::setDisplay0()
    STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_G_Port, Segment_G_Pin);
 
 }
-
-
 
 inline void STM8_DigitubeDriver::setDisplay1()
 {
@@ -169,7 +241,6 @@ inline void STM8_DigitubeDriver::setDisplay5()
 
 }
 
-
 inline void STM8_DigitubeDriver::setDisplay6()
 {
    STM8_DigitubeDriver::stm8_Gpio_Write_High(Segment_A_Port, Segment_A_Pin);
@@ -181,7 +252,6 @@ inline void STM8_DigitubeDriver::setDisplay6()
    STM8_DigitubeDriver::stm8_Gpio_Write_High(Segment_G_Port, Segment_G_Pin);
 
 }
-
 
 inline void STM8_DigitubeDriver::setDisplay7()
 {
@@ -207,7 +277,6 @@ inline void STM8_DigitubeDriver::setDisplay8()
 
 }
 
-
 inline void STM8_DigitubeDriver::setDisplay9()
 {
    STM8_DigitubeDriver::stm8_Gpio_Write_High(Segment_A_Port, Segment_A_Pin);
@@ -219,9 +288,6 @@ inline void STM8_DigitubeDriver::setDisplay9()
    STM8_DigitubeDriver::stm8_Gpio_Write_High(Segment_G_Port, Segment_G_Pin);
 
 }
-
-
-
 
 void STM8_DigitubeDriver::setDisplayDigit(uint8_t digit)
 {
