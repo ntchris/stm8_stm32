@@ -35,8 +35,8 @@ const STM8_DigitubeDriver::Port_Pin STM8_DigitubeDriver::ArrayDigitPortPin[MAX_D
       STM8_DigitubeDriver::Digit4 };
 uint8_t STM8_DigitubeDriver::currentDigitIndex = 0;
 
-char STM8_DigitubeDriver::displayBuffer[MAX_DIGIT_COUNT  ] =
-{ '1', '2', '3', '4'  };
+char STM8_DigitubeDriver::displayBuffer[MAX_DIGIT_COUNT] =
+{ '1', '2', '3', '4' };
 
 #define TIM4_IT_UPDATE      ((uint8_t)0x01)
 
@@ -378,19 +378,16 @@ void STM8_DigitubeDriver::setOneDisplayDigit(unsigned char digit)
 
 }
 
-
 void STM8_DigitubeDriver::setDisplayEmpty()
 {
-     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_A_Port, Segment_A_Pin);
-     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_B_Port, Segment_B_Pin);
-     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_C_Port, Segment_C_Pin);
-     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_D_Port, Segment_D_Pin);
-     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_E_Port, Segment_E_Pin);
-     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_F_Port, Segment_F_Pin);
-     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_G_Port, Segment_G_Pin);
+   STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_A_Port, Segment_A_Pin);
+   STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_B_Port, Segment_B_Pin);
+   STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_C_Port, Segment_C_Pin);
+   STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_D_Port, Segment_D_Pin);
+   STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_E_Port, Segment_E_Pin);
+   STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_F_Port, Segment_F_Pin);
+   STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_G_Port, Segment_G_Pin);
 }
-
-
 
 void STM8_DigitubeDriver::display(int num)
 {
@@ -398,48 +395,67 @@ void STM8_DigitubeDriver::display(int num)
    if (num > MAX_NUMBER_TO_DISPLAY)
    {
 
-      STM8_DigitubeDriver::displayOverflow();
+      STM8_DigitubeDriver::setDisplayBufferOverflow();
+      return;
    }
    else if (num < 0)
    {
-      STM8_DigitubeDriver::displayOverflow();
-
+      STM8_DigitubeDriver::setDisplayBufferOverflow();
+      return;
    }
 
-   memset(displayBuffer, 0, MAX_DIGIT_COUNT );
+   memset(displayBuffer, 0, MAX_DIGIT_COUNT);
 
    if (num == 0)
    {
-      displayBuffer[MAX_DIGIT_COUNT-1] = '0' + 0;
+      displayBuffer[MAX_DIGIT_COUNT - 1] = '0' + 0;
       return;
    }
 
    int number = num;
-   const int Ten=10;
-   int divide = Ten;
-   int index = MAX_DIGIT_COUNT -1 ;
-   static int left=0;
+   const int Ten = 10;
 
+   int index = MAX_DIGIT_COUNT - 1;
+   static int left = 0;
 
    do
    {
       left = number % Ten;
-      displayBuffer[ index ] = '0' + left;
-      number = number /Ten;
-       index--;
-   } while (index >=0  && number>0 );
+      displayBuffer[index] = '0' + left;
+      number = number / Ten;
+      index--;
+   } while (index >= 0 && number > 0);
 }
 
 void STM8_DigitubeDriver::display(unsigned char * num)
 {
-   if (!num) return;
+   if (!num)
+   {
+      //just display empty buffer
+
+      return;
+   }
    memcpy(displayBuffer, num, MAX_DIGIT_COUNT);
 
 }
 
-void STM8_DigitubeDriver::displayOverflow(void)
+void STM8_DigitubeDriver::setDisplayBufferEmpty(void)
 {
-   STM8_DigitubeDriver::setDisplay8();
+   for (int i = 0; i < MAX_DIGIT_COUNT; i++)
+   {
+      displayBuffer[i] = 0; // means empty, not '0'
+   }
+   STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_Dp_Port, Segment_Dp_Pin);
+
+}
+
+void STM8_DigitubeDriver::setDisplayBufferOverflow(void)
+{
+   for (int i = 0; i < MAX_DIGIT_COUNT; i++)
+   {
+      displayBuffer[i] = '8';
+   }
+
    STM8_DigitubeDriver::stm8_Gpio_Write_High(Segment_Dp_Port, Segment_Dp_Pin);
 
 }

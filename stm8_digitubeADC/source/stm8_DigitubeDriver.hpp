@@ -163,7 +163,9 @@ public:
    static void  display( int  num);
 
    static void  display(unsigned char * num);
-   static void displayOverflow(void);
+   static void setDisplayBufferOverflow(void);
+   static void setDisplayBufferEmpty(void);
+
 
  };
 
