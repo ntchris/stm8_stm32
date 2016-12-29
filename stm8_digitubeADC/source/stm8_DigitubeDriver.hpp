@@ -20,6 +20,7 @@
  *
  */
 #include "stm8s.h"
+#include <string.h>
 
 typedef enum
 {
@@ -88,26 +89,24 @@ typedef enum
    GPIO_MODE_OUT_PP_HIGH_SLOW = (uint8_t) 0xD0 /*!< Output push-pull, high level, 2MHz */
 } GPIO_Mode_TypeDef;
 
-
-
 typedef enum
 {
-  TIM4_PRESCALER_1  = ((uint8_t)0x00),
-  TIM4_PRESCALER_2    = ((uint8_t)0x01),
-  TIM4_PRESCALER_4    = ((uint8_t)0x02),
-  TIM4_PRESCALER_8     = ((uint8_t)0x03),
-  TIM4_PRESCALER_16   = ((uint8_t)0x04),
-  TIM4_PRESCALER_32     = ((uint8_t)0x05),
-  TIM4_PRESCALER_64    = ((uint8_t)0x06),
-  TIM4_PRESCALER_128   = ((uint8_t)0x07)
+   TIM4_PRESCALER_1 = ((uint8_t) 0x00),
+   TIM4_PRESCALER_2 = ((uint8_t) 0x01),
+   TIM4_PRESCALER_4 = ((uint8_t) 0x02),
+   TIM4_PRESCALER_8 = ((uint8_t) 0x03),
+   TIM4_PRESCALER_16 = ((uint8_t) 0x04),
+   TIM4_PRESCALER_32 = ((uint8_t) 0x05),
+   TIM4_PRESCALER_64 = ((uint8_t) 0x06),
+   TIM4_PRESCALER_128 = ((uint8_t) 0x07)
 } TIM4_Prescaler_TypeDef;
-
-
-
 
 // Connect a 4 digit digitube
 static const uint8_t MAX_DIGIT = 4;
 static const uint8_t MAX_Segment = 7;  // A - G  , Dp doesn't count
+
+// stm8 and 4 digits 7 segments digitube so the max number it can display is 9999
+static const int MAX_NUMBER = 9999;
 
 class STM8_DigitubeDriver
 {
@@ -118,18 +117,20 @@ class STM8_DigitubeDriver
       GPIO_Pin_TypeDef pin;
    };
 
-   static const Port_Pin Segment_A, Segment_B, Segment_C, Segment_D, Segment_E, Segment_F,
-         Segment_G, Segment_Dp;
-   static const Port_Pin ArrayPortPin[MAX_Segment];
-
+   /*static const Port_Pin Segment_A, Segment_B, Segment_C, Segment_D, Segment_E, Segment_F,
+    Segment_G, Segment_Dp;
+    static const Port_Pin ArrayPortPin[MAX_Segment];
+    */
    static const Port_Pin Digit1, Digit2, Digit3, Digit4;
 
-   static const Port_Pin ArrayDigit[MAX_DIGIT];
+   static const Port_Pin ArrayDigitPortPin[MAX_DIGIT];
    static uint8_t currentDigitIndex;
 
+   // if it's 1234 then display 1234
+   static char displayBuffer[MAX_DIGIT+1]; // add one for ending 0
    //={Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A    } ;
 
-   const static int Full_Cycle=20;
+   const static int Full_Cycle = 20;
    const static int Duty_PWM = 3; // bigger the brighter
 
    static void gpioInitPushPull(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef GPIO_Pin);
@@ -146,15 +147,22 @@ class STM8_DigitubeDriver
    static void setDisplay9();
    static void tim4_Interupt_Init(void);
    static void stm8_Pins_For_DigitubeInit(void);
+   static void stm8_Gpio_Write_Low(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins);
+   static void stm8_Gpio_Write_High(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins);
+   static void setOneDisplayDigit(uint8_t digit);
 
 public:
 
    static void stm8_TIM4_Interrupt(void);
    static void stm8_init(void);
 
-   static void stm8_Gpio_Write_Low(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins);
-   static void stm8_Gpio_Write_High(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins);
-   //set the 7 segment digit, so current enabled digitN show the digit
-   static void setDisplayDigit(uint8_t digit);
-};
+
+
+
+   static void  display( int  num);
+
+   static void  display(unsigned char * num);
+   static void displayOverflow(void);
+
+ };
 
