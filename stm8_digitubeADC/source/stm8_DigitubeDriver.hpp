@@ -102,11 +102,11 @@ typedef enum
 } TIM4_Prescaler_TypeDef;
 
 // Connect a 4 digit digitube
-static const uint8_t MAX_DIGIT = 4;
+static const uint8_t MAX_DIGIT_COUNT = 4;
 static const uint8_t MAX_Segment = 7;  // A - G  , Dp doesn't count
 
 // stm8 and 4 digits 7 segments digitube so the max number it can display is 9999
-static const int MAX_NUMBER = 9999;
+static const int MAX_NUMBER_TO_DISPLAY = 9999;
 
 class STM8_DigitubeDriver
 {
@@ -123,11 +123,11 @@ class STM8_DigitubeDriver
     */
    static const Port_Pin Digit1, Digit2, Digit3, Digit4;
 
-   static const Port_Pin ArrayDigitPortPin[MAX_DIGIT];
+   static const Port_Pin ArrayDigitPortPin[MAX_DIGIT_COUNT];
    static uint8_t currentDigitIndex;
 
    // if it's 1234 then display 1234
-   static char displayBuffer[MAX_DIGIT+1]; // add one for ending 0
+   static char displayBuffer[MAX_DIGIT_COUNT ]; // add one for ending 0
    //={Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A    } ;
 
    const static int Full_Cycle = 20;
@@ -150,7 +150,8 @@ class STM8_DigitubeDriver
    static void stm8_Gpio_Write_Low(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins);
    static void stm8_Gpio_Write_High(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins);
    static void setOneDisplayDigit(uint8_t digit);
-
+   static void setDisplayEmpty(void);
+   //static void display
 public:
 
    static void stm8_TIM4_Interrupt(void);

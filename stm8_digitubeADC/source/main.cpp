@@ -12,16 +12,21 @@ int main()
 {
 
    STM8_DigitubeDriver::stm8_init();
-   int i;
+   int i=0;
 
-   //STM8_DigitubeDriver::setDisplayDigit(8);
 
    while (true)
    {
-       STM8_DigitubeDriver::display(i);
+      STM8_DigitubeDriver::display(i);
 
        i++;
-       Delayms(800);
+       Delayms(10);
+
+       if(i> MAX_NUMBER_TO_DISPLAY+100 )
+       {
+
+          i=0;
+       }
 
 
    };

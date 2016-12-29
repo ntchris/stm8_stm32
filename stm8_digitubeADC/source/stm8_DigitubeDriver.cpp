@@ -1,4 +1,3 @@
-
 #include "stm8_DigitubeDriver.hpp"
 
 #include <stdio.h>
@@ -31,13 +30,13 @@ const STM8_DigitubeDriver::Port_Pin STM8_DigitubeDriver::Digit3 =
 const STM8_DigitubeDriver::Port_Pin STM8_DigitubeDriver::Digit4 =
 { Segment_Digit4_Port, Segment_Digit4_Pin };
 
-const STM8_DigitubeDriver::Port_Pin STM8_DigitubeDriver::ArrayDigitPortPin[MAX_DIGIT] =
+const STM8_DigitubeDriver::Port_Pin STM8_DigitubeDriver::ArrayDigitPortPin[MAX_DIGIT_COUNT] =
 { STM8_DigitubeDriver::Digit1, STM8_DigitubeDriver::Digit2, STM8_DigitubeDriver::Digit3,
       STM8_DigitubeDriver::Digit4 };
 uint8_t STM8_DigitubeDriver::currentDigitIndex = 0;
 
-char STM8_DigitubeDriver::displayBuffer[MAX_DIGIT+1] =
-{ '1', '2', '3', '4',0 };
+char STM8_DigitubeDriver::displayBuffer[MAX_DIGIT_COUNT  ] =
+{ '1', '2', '3', '4'  };
 
 #define TIM4_IT_UPDATE      ((uint8_t)0x01)
 
@@ -57,9 +56,6 @@ inline void STM8_DigitubeDriver::tim4_Interupt_Init(void)
    enableInterrupts();
 
 }
-
-
-
 
 void Delay8us(void)
 {
@@ -83,8 +79,6 @@ void Delayms(unsigned int ms)
 
 }
 
-
-
 inline void STM8_DigitubeDriver::stm8_TIM4_Interrupt(void)
 {
 
@@ -97,7 +91,8 @@ inline void STM8_DigitubeDriver::stm8_TIM4_Interrupt(void)
    {
       // turn ON
       // set the digit (only one) for digitube to show
-      STM8_DigitubeDriver::setOneDisplayDigit(STM8_DigitubeDriver::displayBuffer[currentDigitIndex]);
+      STM8_DigitubeDriver::setOneDisplayDigit(
+            STM8_DigitubeDriver::displayBuffer[currentDigitIndex]);
 
       // turn on only the current digit
       STM8_DigitubeDriver::stm8_Gpio_Write_Low(currentDigit->port, currentDigit->pin);
@@ -122,7 +117,7 @@ inline void STM8_DigitubeDriver::stm8_TIM4_Interrupt(void)
          //========================
          // refresh digits
          currentDigitIndex++;
-         if (currentDigitIndex >= MAX_DIGIT)
+         if (currentDigitIndex >= MAX_DIGIT_COUNT)
          {
             currentDigitIndex = 0;
          }
@@ -150,8 +145,6 @@ INTERRUPT_HANDLER(TIM4_UPD_OVF_IRQHandler, 23)
    STM8_DigitubeDriver::stm8_TIM4_Interrupt();
    isReady = true;
 }
-
-
 
 inline void STM8_DigitubeDriver::stm8_Gpio_Write_Low(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins)
 {
@@ -379,40 +372,74 @@ void STM8_DigitubeDriver::setOneDisplayDigit(unsigned char digit)
          STM8_DigitubeDriver::setDisplay9();
          break;
       default:
-         ;
+         STM8_DigitubeDriver::setDisplayEmpty();
+
    }
 
 }
 
+
+void STM8_DigitubeDriver::setDisplayEmpty()
+{
+     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_A_Port, Segment_A_Pin);
+     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_B_Port, Segment_B_Pin);
+     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_C_Port, Segment_C_Pin);
+     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_D_Port, Segment_D_Pin);
+     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_E_Port, Segment_E_Pin);
+     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_F_Port, Segment_F_Pin);
+     STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_G_Port, Segment_G_Pin);
+}
 
 
 
 void STM8_DigitubeDriver::display(int num)
 {
 
-   if(num > MAX_NUMBER  )
+   if (num > MAX_NUMBER_TO_DISPLAY)
    {
 
       STM8_DigitubeDriver::displayOverflow();
-   }else if(num <0)
+   }
+   else if (num < 0)
    {
       STM8_DigitubeDriver::displayOverflow();
 
    }
+
+   memset(displayBuffer, 0, MAX_DIGIT_COUNT );
+
+   if (num == 0)
+   {
+      displayBuffer[MAX_DIGIT_COUNT-1] = '0' + 0;
+      return;
+   }
+
+   int number = num;
+   const int Ten=10;
+   int divide = Ten;
+   int index = MAX_DIGIT_COUNT -1 ;
+   static int left=0;
+
+
+   do
+   {
+      left = number % Ten;
+      displayBuffer[ index ] = '0' + left;
+      number = number /Ten;
+       index--;
+   } while (index >=0  && number>0 );
 }
 
 void STM8_DigitubeDriver::display(unsigned char * num)
 {
-   if(!num) return;
-   memcpy(displayBuffer, num, MAX_NUMBER);
+   if (!num) return;
+   memcpy(displayBuffer, num, MAX_DIGIT_COUNT);
 
 }
-
 
 void STM8_DigitubeDriver::displayOverflow(void)
 {
    STM8_DigitubeDriver::setDisplay8();
-   STM8_DigitubeDriver:: stm8_Gpio_Write_High(Segment_Dp_Port, Segment_Dp_Pin);
-
+   STM8_DigitubeDriver::stm8_Gpio_Write_High(Segment_Dp_Port, Segment_Dp_Pin);
 
 }
