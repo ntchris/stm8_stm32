@@ -133,7 +133,7 @@ class STM8_DigitubeDriver
    //={Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A    } ;
 
    const static int Full_Cycle = 20;
-   const static int Duty_PWM = 3; // bigger the brighter
+   const static int Duty_PWM = 5; // bigger the brighter
 
    static void gpioInitPushPull(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef GPIO_Pin);
 
@@ -147,6 +147,9 @@ class STM8_DigitubeDriver
    static void setDisplay7();
    static void setDisplay8();
    static void setDisplay9();
+   static void setDisplayV();
+   static void setDisplayA();
+
    static void tim4_Interupt_Init(void);
    static void stm8_Pins_For_DigitubeInit(void);
    static void stm8_Gpio_Write_Low(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins);
@@ -170,7 +173,8 @@ public:
    static void setDisplayBufferEmpty(void);
    static void displayString(const char * str);
    static void displayFloat(float f);
-
+   static void displayVoltage(float f);
+   static void displayCurrent(float f);
 
  };
 
