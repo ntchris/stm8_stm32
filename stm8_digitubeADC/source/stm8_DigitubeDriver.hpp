@@ -128,6 +128,8 @@ class STM8_DigitubeDriver
 
    // if it's 1234 then display 1234
    static char displayBuffer[MAX_DIGIT_COUNT ]; // add one for ending 0
+   static bool displayBufferDot[MAX_DIGIT_COUNT ]; // add one for ending 0
+
    //={Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A    } ;
 
    const static int Full_Cycle = 20;
@@ -150,7 +152,8 @@ class STM8_DigitubeDriver
    static void stm8_Gpio_Write_Low(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins);
    static void stm8_Gpio_Write_High(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins);
    static void setOneDisplayDigit(uint8_t digit);
-   static void setDisplayEmpty(void);
+   static void setDisplayDigitEmpty(void);
+   static bool checkIfOverflow(const char* str);
    //static void display
 public:
 
@@ -162,9 +165,11 @@ public:
 
    static void  display( int  num);
 
-   static void  display(unsigned char * num);
+   static void display(unsigned char * num);
    static void setDisplayBufferOverflow(void);
    static void setDisplayBufferEmpty(void);
+   static void displayString(const char * str);
+   static void display(float f);
 
 
  };

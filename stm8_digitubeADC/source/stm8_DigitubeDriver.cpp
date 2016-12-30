@@ -38,6 +38,9 @@ uint8_t STM8_DigitubeDriver::currentDigitIndex = 0;
 char STM8_DigitubeDriver::displayBuffer[MAX_DIGIT_COUNT] =
 { '1', '2', '3', '4' };
 
+bool STM8_DigitubeDriver::displayBufferDot[MAX_DIGIT_COUNT] =
+{ false, false, false, false }; // add one for ending 0
+
 #define TIM4_IT_UPDATE      ((uint8_t)0x01)
 
 inline void STM8_DigitubeDriver::tim4_Interupt_Init(void)
@@ -94,8 +97,19 @@ inline void STM8_DigitubeDriver::stm8_TIM4_Interrupt(void)
       STM8_DigitubeDriver::setOneDisplayDigit(
             STM8_DigitubeDriver::displayBuffer[currentDigitIndex]);
 
-      // turn on only the current digit
+      //set dp
+      if (displayBufferDot[currentDigitIndex])
+      {
+         STM8_DigitubeDriver::stm8_Gpio_Write_High(Segment_Dp_Port, Segment_Dp_Pin);
+      }
+      else
+      {
+         STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_Dp_Port, Segment_Dp_Pin);
+      }
+
+      // turn on current digit
       STM8_DigitubeDriver::stm8_Gpio_Write_Low(currentDigit->port, currentDigit->pin);
+
       isOff = false;
       count++;
       return;
@@ -109,6 +123,9 @@ inline void STM8_DigitubeDriver::stm8_TIM4_Interrupt(void)
       {
          //set digit off
          STM8_DigitubeDriver::stm8_Gpio_Write_High(currentDigit->port, currentDigit->pin);
+
+         STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_Dp_Port, Segment_Dp_Pin);
+
          isOff = true;
       }
       if (count >= PWM_LOOP)
@@ -167,6 +184,10 @@ void STM8_DigitubeDriver::gpioInitPushPull(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef
 
 void STM8_DigitubeDriver::stm8_init(void)
 {
+
+   memset(displayBuffer, 0, MAX_DIGIT_COUNT);
+   memset(displayBufferDot, 0, MAX_DIGIT_COUNT);
+
    STM8_DigitubeDriver::stm8_Pins_For_DigitubeInit();
    STM8_DigitubeDriver::tim4_Interupt_Init();
 }
@@ -372,13 +393,13 @@ void STM8_DigitubeDriver::setOneDisplayDigit(unsigned char digit)
          STM8_DigitubeDriver::setDisplay9();
          break;
       default:
-         STM8_DigitubeDriver::setDisplayEmpty();
+         STM8_DigitubeDriver::setDisplayDigitEmpty();
 
    }
 
 }
 
-void STM8_DigitubeDriver::setDisplayEmpty()
+void STM8_DigitubeDriver::setDisplayDigitEmpty()
 {
    STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_A_Port, Segment_A_Pin);
    STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_B_Port, Segment_B_Pin);
@@ -444,8 +465,8 @@ void STM8_DigitubeDriver::setDisplayBufferEmpty(void)
    for (int i = 0; i < MAX_DIGIT_COUNT; i++)
    {
       displayBuffer[i] = 0; // means empty, not '0'
+      displayBufferDot[i] = false;
    }
-   STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_Dp_Port, Segment_Dp_Pin);
 
 }
 
@@ -454,8 +475,189 @@ void STM8_DigitubeDriver::setDisplayBufferOverflow(void)
    for (int i = 0; i < MAX_DIGIT_COUNT; i++)
    {
       displayBuffer[i] = '8';
+      displayBufferDot[i] = true;
    }
 
-   STM8_DigitubeDriver::stm8_Gpio_Write_High(Segment_Dp_Port, Segment_Dp_Pin);
+}
+
+int stringIndexOf(const char *string, char targetC)
+{
+   if (string == 0)
+   {
+      return -1;
+   }
+
+   int index = 0;
+   while (string[index] != targetC)
+   {
+      if (string[index] == 0)
+      {
+         return -1;
+      }
+
+      index++;
+
+   }
+   return index;
 
 }
+
+//  if m_maxDisplayDigits is 4,  then 8.8.8.8 is not overflow
+//  88888 is overflow
+bool STM8_DigitubeDriver::checkIfOverflow(const char* str)
+{
+
+   // null string, empty
+   if (str == 0)
+   {
+      return false;
+   }
+
+   //deal with special cases first
+   if (str[0] == 0)
+   {
+      return false;
+   }
+
+   uint8_t digitCount = 0;
+
+   int strlength = strlen(str);
+
+   if (strlength <= MAX_DIGIT_COUNT)
+   {
+      return false;
+   }
+   int dotIndex = stringIndexOf(str, '.');
+
+   if (dotIndex < 0 && strlength > MAX_DIGIT_COUNT)
+   {
+      //there is no dot but more chars than MAX_DIGIT_COUNT, so it has to be overflow
+      return true;
+   }
+
+   //it has dot and it it's more then MAX_DIGIT_COUNT, need to do some calculation
+   for (int i = 0; i < strlength; i++)
+   {
+      char c = str[i];
+      if (c == '.')
+      {
+         //if previous char not exist , +1
+         if (i == 0)
+         {
+            digitCount++;
+         }
+         else if (str[i - 1] == '.')
+         {
+            //if previous char is . +1,
+            digitCount++;
+
+         }
+         else
+         {
+            //if prevous char is other, don't +1
+
+         }
+      }
+      else
+      {
+         digitCount++;
+      }
+
+      if (digitCount > MAX_DIGIT_COUNT)
+      {
+         return true;
+      }
+   }
+
+   return false;
+
+}
+
+void STM8_DigitubeDriver::displayString(const char * str)
+{
+   // make a copy of the string so we don't trim the original string
+   //String trimstr = str;
+   //trimstr.trim();
+
+   //check if string is longer than the installed digitube digits
+   //debugPrint("display " , str);
+   memset(displayBuffer, 0, MAX_DIGIT_COUNT);
+   memset(displayBufferDot, 0, MAX_DIGIT_COUNT);
+
+   // null string, empty
+   if (str == 0)
+   {
+      return;
+   }
+
+   //deal with special cases first
+   if (str[0] == 0)
+   {
+      return;
+   }
+   else
+   {
+      if (checkIfOverflow(str))
+      {
+         STM8_DigitubeDriver::setDisplayBufferOverflow();
+         return;
+      }
+
+      // find the end of the number string
+      int endIndex = strlen(str) - 1;
+
+      int strIndex = endIndex;
+      //the index for display character buffer (digit buffer)
+      uint8_t bufferIndex = MAX_DIGIT_COUNT - 1;
+
+      // the dot buffer index
+      uint8_t bufferDotIndex = MAX_DIGIT_COUNT - 1;
+
+      for (strIndex = endIndex; strIndex >= 0; strIndex--)
+      {
+
+         //process from the end of number
+         char c = str[strIndex];
+
+         if (c == 0) break;
+
+         if (c == '.')
+         {
+            if (displayBufferDot[bufferDotIndex] == true)
+            {
+               // this is the 2nd dot
+               bufferDotIndex--;
+               displayBufferDot[bufferDotIndex] = true;
+               bufferIndex--;
+
+            }
+            else
+            {
+               displayBufferDot[bufferDotIndex] = true;
+            }
+
+         }
+         else
+         {
+            displayBuffer[bufferIndex] = c;
+            bufferIndex--;
+            bufferDotIndex--;
+         }
+         //safety guard
+         if (bufferIndex < 0)
+         {
+           break;
+         }
+      }
+   }
+
+}
+
+
+
+void STM8_DigitubeDriver::display(float f)
+{
+
+
+}
+

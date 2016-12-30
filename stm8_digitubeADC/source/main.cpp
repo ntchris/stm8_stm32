@@ -1,11 +1,34 @@
 #include "stm8_DigitubeDriver.hpp"
 
 
+#define TESTBUILD
+
+
+
+#ifdef TESTBUILD
+void doTest()
+{
+
+    STM8_DigitubeDriver::displayString("12.34");
+
+    STM8_DigitubeDriver::displayString("13..4");
+    STM8_DigitubeDriver::displayString("....");
+
+    STM8_DigitubeDriver::displayString("...1");
+    STM8_DigitubeDriver::displayString("1..2");
+
+
+}
+
+#endif
+
 
 
 
 
 void Delayms(unsigned int ms);
+
+
 
 
 int main()
@@ -17,9 +40,10 @@ int main()
 
    while (true)
    {
-      STM8_DigitubeDriver::display(i);
 
-       //i++;
+      STM8_DigitubeDriver::displayString("1..2");
+
+       i++;
        Delayms(10);
 
        if(i> MAX_NUMBER_TO_DISPLAY+100 )
