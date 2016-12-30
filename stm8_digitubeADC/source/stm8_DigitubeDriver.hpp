@@ -73,6 +73,12 @@ typedef enum
 #define Segment_Digit4_Port  GPIOD
 #define Segment_Digit4_Pin   GPIO_PIN_2
 
+#define ADC_Port  GPIOD
+#define ADC_Pin   GPIO_PIN_3
+
+
+#define AdcChannel (uint8_t)0x04
+
 typedef enum
 {
    GPIO_MODE_IN_FL_NO_IT = (uint8_t) 0x00, /*!< Input floating, no external interrupt */
@@ -157,6 +163,8 @@ class STM8_DigitubeDriver
    static void setOneDisplayDigit(uint8_t digit);
    static void setDisplayDigitEmpty(void);
    static bool checkIfOverflow(const char* str);
+   static void adcInit(void);
+
    //static void display
 public:
 
@@ -166,9 +174,9 @@ public:
 
 
 
-   static void  display( int  num);
+   static void  displayInt( int  num);
 
-   static void display(unsigned char * num);
+   //static void display(unsigned char * num);
    static void setDisplayBufferOverflow(void);
    static void setDisplayBufferEmpty(void);
    static void displayString(const char * str);

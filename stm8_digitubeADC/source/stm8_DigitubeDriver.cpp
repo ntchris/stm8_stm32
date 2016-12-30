@@ -130,7 +130,7 @@ void intToString(int num, char *str, int maxLen)
    if (num == 0)
    {
       str[0] = '0';
-      str[1]=0;
+      str[1] = 0;
       return;
    }
 
@@ -260,6 +260,7 @@ void STM8_DigitubeDriver::stm8_init(void)
 
    STM8_DigitubeDriver::stm8_Pins_For_DigitubeInit();
    STM8_DigitubeDriver::tim4_Interupt_Init();
+   STM8_DigitubeDriver::adcInit();
 }
 
 void STM8_DigitubeDriver::stm8_Pins_For_DigitubeInit(void)
@@ -562,7 +563,7 @@ void STM8_DigitubeDriver::setDisplayDigitEmpty()
  }
  */
 
-void STM8_DigitubeDriver::display(int num)
+void STM8_DigitubeDriver::displayInt(int num)
 {
    static char buffer[MAX_DIGIT_COUNT + 1];
 
@@ -578,6 +579,7 @@ void STM8_DigitubeDriver::display(int num)
 
 }
 
+/*
 void STM8_DigitubeDriver::display(unsigned char * num)
 {
    if (!num)
@@ -589,6 +591,8 @@ void STM8_DigitubeDriver::display(unsigned char * num)
    memcpy(STM8_DigitubeDriver::displayBuffer, num, MAX_DIGIT_COUNT);
 
 }
+*/
+
 
 void STM8_DigitubeDriver::setDisplayBufferEmpty(void)
 {
@@ -857,3 +861,57 @@ void STM8_DigitubeDriver::displayCurrent(float amp)
    STM8_DigitubeDriver::displayString(currentString);
 }
 
+void STM8_DigitubeDriver::adcInit(void)
+{
+
+   // =============================  input floating ==============
+
+   ADC_Port->CR2 &= (uint8_t) (~(ADC_Pin));  // reset
+
+   ADC_Port->DDR &= (uint8_t) ~ADC_Pin;  // input mode
+
+
+    ADC_Port->CR1 &= (uint8_t)(~ ADC_Pin ); // Floating
+
+
+    uint8_t ADC1_ALIGN_RIGHT = (uint8_t)0x08;
+
+   //ADC1_ConversionConfig
+   /* Clear the ADC1 channels */
+   ADC1->CSR &= (uint8_t) (~ADC1_CSR_CH);
+
+   /* Select the ADC1 channel */
+   ADC1->CSR |= (uint8_t) (AdcChannel );
+
+   /* Clear the align bit */
+   ADC1->CR2 &= (uint8_t) (~ADC1_CR2_ALIGN);
+   /* Configure the data alignment */
+   ADC1->CR2 |= (uint8_t) (ADC1_ALIGN_RIGHT);
+   ADC1->CSR |= (uint8_t) (AdcChannel );
+
+   // continuous mode
+   ADC1->CR1 |= ADC1_CR1_CONT;
+   //
+
+   // ====================================
+   //  prescaler config
+
+   /* Clear the SPSEL bits */
+   ADC1->CR1 &= (uint8_t) (~ADC1_CR1_SPSEL);
+   /* Select the prescaler division factor according to ADC1_PrescalerSelection values */
+
+   const uint8_t ADC1_PRESSEL_FCPU_D2 = (uint8_t) 0x00;
+   ADC1->CR1 |= (uint8_t) (ADC1_PRESSEL_FCPU_D2);
+
+   // =====================================
+   //   ADC1_ExternalTriggerConfig
+   ADC1->CR2 &= (uint8_t)(~ADC1_CR2_EXTSEL);
+   ADC1->CR2 |= (uint8_t)(ADC1_CR2_EXTTRIG);
+   uint8_t ADC1_EXTTRIG_GPIO  = (uint8_t)0x10;
+   ADC1->CR2 |= (uint8_t)(ADC1_EXTTRIG_GPIO);
+
+
+   //enable !
+   ADC1->CR1 |= ADC1_CR1_ADON; // or by raising of the PD3 ETR
+
+}
