@@ -82,6 +82,81 @@ void Delayms(unsigned int ms)
 
 }
 
+
+// so far only trim the leading space
+//  ie ____5  to 5
+void trim( char*str)
+{
+   int index =0;
+   while(str[index]==' ' )
+   {
+      index++;
+      if(str[index]==0) break;
+   }
+   if(index==0)
+   {
+      // no space to trim
+      return;
+   }
+   // now  str[index] is not space ' '
+   int newIndex=0;
+   do{
+
+       str[newIndex]= str[index];
+       if( str[index]==0 )
+       {
+
+          break;
+       }
+       newIndex++;
+       index++;
+   }while(true);
+
+}
+
+
+
+
+// translate the provide int i to string str ( well it's just char* )
+void intToString(int num, char *str, int maxLen)
+{
+   if (str == 0) return;
+
+   memset(str,' ', maxLen);
+   str[maxLen-1]=0;
+   if (num < 0)
+   {
+      str[0] = 0;
+      return;
+   }
+
+   if (num == 0)
+   {
+      str[0] = '0';
+
+      return;
+   }
+
+   const int Ten = 10;
+
+   static int index = maxLen - 1-1; //   maxLen - 1 is the ending 0, so the last char is - 1 -1
+   index = maxLen - 1-1;
+   int left = 0;
+
+   do
+   {
+      left = num % Ten;
+      str[index] = '0' + left;
+      num = num / Ten;
+      index--;
+   } while (index >= 0 && num > 0);
+
+
+   //trim if 5, then it 's  ___5 need to move 5 to the head
+   trim( str);
+}
+
+
 inline void STM8_DigitubeDriver::stm8_TIM4_Interrupt(void)
 {
 
@@ -410,8 +485,49 @@ void STM8_DigitubeDriver::setDisplayDigitEmpty()
    STM8_DigitubeDriver::stm8_Gpio_Write_Low(Segment_G_Port, Segment_G_Pin);
 }
 
+/*
+ void STM8_DigitubeDriver::display(int num)
+ {
+
+ if (num > MAX_NUMBER_TO_DISPLAY)
+ {
+
+ STM8_DigitubeDriver::setDisplayBufferOverflow();
+ return;
+ }
+ else if (num < 0)
+ {
+ STM8_DigitubeDriver::setDisplayBufferOverflow();
+ return;
+ }
+
+ memset(displayBuffer, 0, MAX_DIGIT_COUNT);
+
+ if (num == 0)
+ {
+ displayBuffer[MAX_DIGIT_COUNT - 1] = '0' + 0;
+ return;
+ }
+
+ int number = num;
+ const int Ten = 10;
+
+ int index = MAX_DIGIT_COUNT - 1;
+ static int left = 0;
+
+ do
+ {
+ left = number % Ten;
+ displayBuffer[index] = '0' + left;
+ number = number / Ten;
+ index--;
+ } while (index >= 0 && number > 0);
+ }
+ */
+
 void STM8_DigitubeDriver::display(int num)
 {
+   static char buffer[MAX_DIGIT_COUNT + 1];
 
    if (num > MAX_NUMBER_TO_DISPLAY)
    {
@@ -419,33 +535,10 @@ void STM8_DigitubeDriver::display(int num)
       STM8_DigitubeDriver::setDisplayBufferOverflow();
       return;
    }
-   else if (num < 0)
-   {
-      STM8_DigitubeDriver::setDisplayBufferOverflow();
-      return;
-   }
 
-   memset(displayBuffer, 0, MAX_DIGIT_COUNT);
+   intToString(num, buffer, MAX_DIGIT_COUNT+1);
+   STM8_DigitubeDriver::displayString(buffer);
 
-   if (num == 0)
-   {
-      displayBuffer[MAX_DIGIT_COUNT - 1] = '0' + 0;
-      return;
-   }
-
-   int number = num;
-   const int Ten = 10;
-
-   int index = MAX_DIGIT_COUNT - 1;
-   static int left = 0;
-
-   do
-   {
-      left = number % Ten;
-      displayBuffer[index] = '0' + left;
-      number = number / Ten;
-      index--;
-   } while (index >= 0 && number > 0);
 }
 
 void STM8_DigitubeDriver::display(unsigned char * num)
@@ -456,7 +549,7 @@ void STM8_DigitubeDriver::display(unsigned char * num)
 
       return;
    }
-   memcpy(displayBuffer, num, MAX_DIGIT_COUNT);
+   memcpy(STM8_DigitubeDriver::displayBuffer, num, MAX_DIGIT_COUNT);
 
 }
 
@@ -608,10 +701,10 @@ void STM8_DigitubeDriver::displayString(const char * str)
 
       int strIndex = endIndex;
       //the index for display character buffer (digit buffer)
-      uint8_t bufferIndex = MAX_DIGIT_COUNT - 1;
+      int bufferIndex = MAX_DIGIT_COUNT - 1;
 
       // the dot buffer index
-      uint8_t bufferDotIndex = MAX_DIGIT_COUNT - 1;
+      int bufferDotIndex = MAX_DIGIT_COUNT - 1;
 
       for (strIndex = endIndex; strIndex >= 0; strIndex--)
       {
@@ -644,20 +737,71 @@ void STM8_DigitubeDriver::displayString(const char * str)
             bufferDotIndex--;
          }
          //safety guard
-         if (bufferIndex < 0)
+         if (bufferIndex < 0 || bufferDotIndex < 0)
          {
-           break;
+            break;
          }
+
       }
    }
 
 }
 
 
-
-void STM8_DigitubeDriver::display(float f)
+// let's don't make this too complicated!!
+void floatToString(float f, char *str, int maxLen)
 {
+   memset(str, 0, maxLen);
 
+
+
+   // part1
+   int intPart = (int)f;
+
+   if( intPart > MAX_NUMBER_TO_DISPLAY )
+   {
+      // the integer part is already bigger than the Max
+      STM8_DigitubeDriver::setDisplayBufferOverflow();
+      return;
+   }
+   intToString(intPart, str, maxLen );
+
+   //deal with fraction part
+
+   // let's don't make this too complicated!!
+   const int MaxFloatDigits=2;
+   static char strF[MaxFloatDigits+1];
+   memset(strF,0,MaxFloatDigits+1);
+   static int floatPart_2_digits;
+   floatPart_2_digits = (f-intPart ) * 100;
+
+   if( floatPart_2_digits>0)
+   {
+
+      intToString(floatPart_2_digits, strF, MaxFloatDigits+1);
+      strcat(str , ".");
+   }
+
+   strcat(str, strF);
+
+
+}
+
+
+void STM8_DigitubeDriver::displayFloat(float f)
+{
+   const int stringSize = 3 * MAX_DIGIT_COUNT;
+   char string[stringSize];
+   if (f > MAX_NUMBER_TO_DISPLAY)
+   {
+      setDisplayBufferOverflow();
+      return;
+   }
+
+   //don't make this too complicated, limit the string for float just 3
+   const int MaxFloatLen = MAX_DIGIT_COUNT;
+   floatToString(f, string, MaxFloatLen);
+   STM8_DigitubeDriver:: displayString(string);
 
 }
 

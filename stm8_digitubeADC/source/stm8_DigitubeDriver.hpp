@@ -169,7 +169,7 @@ public:
    static void setDisplayBufferOverflow(void);
    static void setDisplayBufferEmpty(void);
    static void displayString(const char * str);
-   static void display(float f);
+   static void displayFloat(float f);
 
 
  };
