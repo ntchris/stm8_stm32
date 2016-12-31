@@ -29,50 +29,21 @@ void doTest()
 
 void Delayms(unsigned int ms);
 
-
-
-float ADC1_GetConversionValue(void)
-{
-
-    static uint16_t temph = 0;
-    uint8_t templ = 0;
-
-    if ((ADC1->CR2 & ADC1_CR2_ALIGN) != 0) /* Right alignment */
-    {
-        /* Read LSB first */
-        templ = ADC1->DRL;
-        /* Then read MSB */
-        temph = ADC1->DRH;
-
-        temph = (uint16_t)(templ | (uint16_t)(temph << (uint8_t)8));
-    }
-
-    static float fvalue = temph*3.3/1024.0;
-    return  fvalue ;
-
-}
-
-
 int main()
 {
 
    STM8_DigitubeDriver::stm8_init();
+   Delayms(500);
 
+   ADC1->CR1 |= ADC1_CR1_ADON;
 
    while (true)
    {
+      STM8_DigitubeDriver::displayADC();
+      //STM8_DigitubeDriver::displayFloat(1.234);
       ADC1->CR1 |= ADC1_CR1_ADON;
+
       Delayms(500);
-
-      float adcValue =0;
-      adcValue = ADC1_GetConversionValue();
-
-
-      STM8_DigitubeDriver::displayFloat(adcValue);
-      Delayms(1500);
-
-      //STM8_DigitubeDriver::displayCurrent(0.512345);
-
 
 
    };

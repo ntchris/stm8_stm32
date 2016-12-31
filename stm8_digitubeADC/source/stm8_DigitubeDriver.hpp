@@ -165,8 +165,7 @@ class STM8_DigitubeDriver
    static bool checkIfOverflow(const char* str);
    static void adcInit(void);
 
-   //static void display
-public:
+ public:
 
    static void stm8_TIM4_Interrupt(void);
    static void stm8_init(void);
@@ -183,6 +182,7 @@ public:
    static void displayFloat(float f);
    static void displayVoltage(float f);
    static void displayCurrent(float f);
+   static void displayADC(void);
 
  };
 

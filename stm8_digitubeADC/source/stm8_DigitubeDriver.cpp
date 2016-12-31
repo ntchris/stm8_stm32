@@ -136,7 +136,7 @@ void intToString(int num, char *str, int maxLen)
 
    const int Ten = 10;
 
-   static int index = maxLen - 1 - 1; //   maxLen - 1 is the ending 0, so the last char is - 1 -1
+   int index = maxLen - 1 - 1; //   maxLen - 1 is the ending 0, so the last char is - 1 -1
    index = maxLen - 1 - 1;
    int left = 0;
 
@@ -565,7 +565,7 @@ void STM8_DigitubeDriver::setDisplayDigitEmpty()
 
 void STM8_DigitubeDriver::displayInt(int num)
 {
-   static char buffer[MAX_DIGIT_COUNT + 1];
+   char buffer[MAX_DIGIT_COUNT + 1];
 
    if (num > MAX_NUMBER_TO_DISPLAY)
    {
@@ -791,7 +791,8 @@ void STM8_DigitubeDriver::displayString(const char * str)
 // let's don't make this too complicated!!
 void floatToString(float f, char *str, int maxLen)
 {
-   memset(str, 0, maxLen);
+   memset(str, ' ', maxLen);
+   str[maxLen]=0;
 
    // part1
    int intPart = (int) f;
@@ -821,7 +822,7 @@ void floatToString(float f, char *str, int maxLen)
    }
 
    strcat(str, strF);
-
+   trim(str);
 }
 
 void STM8_DigitubeDriver::displayFloat(float f)
@@ -890,7 +891,9 @@ void STM8_DigitubeDriver::adcInit(void)
    ADC1->CSR |= (uint8_t) (AdcChannel );
 
    // continuous mode
-   ADC1->CR1 |= ADC1_CR1_CONT;
+   // ADC1->CR1 |= (uint8_t)ADC1_CR1_CONT;
+    ADC1->CR1 &= (uint8_t)(~ADC1_CR1_CONT);
+
    //
 
    // ====================================
@@ -899,19 +902,77 @@ void STM8_DigitubeDriver::adcInit(void)
    /* Clear the SPSEL bits */
    ADC1->CR1 &= (uint8_t) (~ADC1_CR1_SPSEL);
    /* Select the prescaler division factor according to ADC1_PrescalerSelection values */
-
+   const uint8_t ADC1_PRESSEL_FCPU_D18 = (uint8_t)0x70;
    const uint8_t ADC1_PRESSEL_FCPU_D2 = (uint8_t) 0x00;
-   ADC1->CR1 |= (uint8_t) (ADC1_PRESSEL_FCPU_D2);
+   ADC1->CR1 |= (uint8_t) (ADC1_PRESSEL_FCPU_D18);
 
    // =====================================
    //   ADC1_ExternalTriggerConfig
-   ADC1->CR2 &= (uint8_t)(~ADC1_CR2_EXTSEL);
-   ADC1->CR2 |= (uint8_t)(ADC1_CR2_EXTTRIG);
-   uint8_t ADC1_EXTTRIG_GPIO  = (uint8_t)0x10;
-   ADC1->CR2 |= (uint8_t)(ADC1_EXTTRIG_GPIO);
+    ADC1->CR2 &= (uint8_t)(~ADC1_CR2_EXTSEL); // clear
+   //ADC1->CR2 |= (uint8_t)(ADC1_CR2_EXTTRIG); // enable
+   //uint8_t ADC1_EXTTRIG_GPIO  = (uint8_t)0x10;
+   //ADC1->CR2 |= (uint8_t)(ADC1_EXTTRIG_GPIO);
 
 
+    //enable ADC interrupt
+    //ADC1->CSR |= ADC1_CSR_EOCIE;
+
+    //
+    ADC1->CR3 &= ~ADC1_CR3_DBUF; // disable buffer
    //enable !
-   ADC1->CR1 |= ADC1_CR1_ADON; // or by raising of the PD3 ETR
+   ADC1->CR1 |= ADC1_CR1_ADON;
 
 }
+
+
+
+
+float ADC1_GetConversionValue(void)
+{
+
+   uint16_t temph = 0;
+   uint8_t templ = 0;
+
+   if ((ADC1->CR2 & ADC1_CR2_ALIGN) != 0) /* Right alignment */
+   {
+      /* Read LSB first */
+      templ = ADC1->DRL;
+      /* Then read MSB */
+      temph = ADC1->DRH;
+
+      temph = (uint16_t) (templ | (uint16_t) (temph << (uint8_t) 8));
+   }
+
+   float fvalue = temph * 3.263 / 1024.0;
+   uint8_t ADC1_FLAG_EOC = (uint8_t) 0x80; /**< EOC falg */
+   //clear EOC bit
+   ADC1->CSR &= (uint8_t) (~ADC1_FLAG_EOC);
+
+   return fvalue;
+
+}
+
+
+void STM8_DigitubeDriver:: displayADC(void)
+{
+
+     //disable ADC now
+     uint8_t ADC1_FLAG_EOC = (uint8_t) 0x80; /**< EOC falg */
+
+
+     float adcValue = 0;
+     adcValue = ADC1_GetConversionValue();
+
+     STM8_DigitubeDriver::displayFloat(adcValue);
+     // clear end of conversion bit
+
+}
+
+
+INTERRUPT_HANDLER(ADC1_EOC_IRQHandler, 22)
+{
+
+  // STM8_DigitubeDriver::displayADC();
+
+}
+
