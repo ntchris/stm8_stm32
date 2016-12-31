@@ -867,12 +867,13 @@ void STM8_DigitubeDriver::adcInit(void)
 
    // =============================  input floating ==============
 
-   ADC_Port->CR2 &= (uint8_t) (~(ADC_Pin));  // reset
+    ADC_Port->CR2 &= (uint8_t) (~(ADC_Pin));  // reset
 
-   ADC_Port->DDR &= (uint8_t) ~ADC_Pin;  // input mode
+    ADC_Port->DDR &= (uint8_t) ~ADC_Pin;  // input mode
 
 
-    ADC_Port->CR1 &= (uint8_t)(~ ADC_Pin ); // Floating
+   // ADC_Port->CR1 &= (uint8_t)(~ ADC_Pin ); // Floating
+    STM8_DigitubeDriver::stm8_Gpio_Write_Low(ADC_Port, ADC_Pin);
 
 
     uint8_t ADC1_ALIGN_RIGHT = (uint8_t)0x08;
