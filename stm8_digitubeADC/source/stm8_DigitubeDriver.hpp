@@ -22,6 +22,19 @@
 #include "stm8s.h"
 #include <string.h>
 
+#define MaxVoltageAllow3VForSTM8 3.0
+// Let's only allow 24V input, so 24/8=3.0 for stm8.
+// use 68k + 10k to divide the input voltage
+
+
+//stm8 can only accept 3.3v input as ADC source, to increase the voltage range, must divide the voltage using 2 R
+//30K
+#define R1VCheck 30000.0
+//3.6K
+#define R2VGround 3600.0
+#define VoltageTime  (R1VCheck+R2VGround) / R2VGround
+// so the ADC result must times VoltageTime
+
 typedef enum
 {
    GPIO_PIN_0 = ((uint8_t) 0x01), /*!< Pin 0 selected */
@@ -75,7 +88,6 @@ typedef enum
 
 #define ADC_Port  GPIOD
 #define ADC_Pin   GPIO_PIN_3
-
 
 #define AdcChannel (uint8_t)0x04
 
@@ -133,8 +145,8 @@ class STM8_DigitubeDriver
    static uint8_t currentDigitIndex;
 
    // if it's 1234 then display 1234
-   static char displayBuffer[MAX_DIGIT_COUNT ]; // add one for ending 0
-   static bool displayBufferDot[MAX_DIGIT_COUNT ]; // add one for ending 0
+   static char displayBuffer[MAX_DIGIT_COUNT]; // add one for ending 0
+   static bool displayBufferDot[MAX_DIGIT_COUNT]; // add one for ending 0
 
    //={Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A, Segment_A    } ;
 
@@ -165,15 +177,12 @@ class STM8_DigitubeDriver
    static bool checkIfOverflow(const char* str);
    static void adcInit(void);
 
- public:
+public:
 
    static void stm8_TIM4_Interrupt(void);
    static void stm8_init(void);
 
-
-
-
-   static void  displayInt( int  num);
+   static void displayInt(int num);
 
    //static void display(unsigned char * num);
    static void setDisplayBufferOverflow(void);
@@ -184,5 +193,5 @@ class STM8_DigitubeDriver
    static void displayCurrent(float f);
    static void displayADC(void);
 
- };
+};
 

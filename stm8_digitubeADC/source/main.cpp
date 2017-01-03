@@ -33,17 +33,16 @@ int main()
 {
 
    STM8_DigitubeDriver::stm8_init();
-   Delayms(500);
 
-   ADC1->CR1 |= ADC1_CR1_ADON;
 
    while (true)
    {
-      STM8_DigitubeDriver::displayADC();
+     // STM8_DigitubeDriver::displayADC();
       //STM8_DigitubeDriver::displayFloat(1.234);
-      ADC1->CR1 |= ADC1_CR1_ADON;
+      //ADC1->CR1 |= ADC1_CR1_ADON;
 
-      Delayms(500);
+      Delayms(300);
+      ADC1->CR1 |= ADC1_CR1_ADON;
 
 
    };
