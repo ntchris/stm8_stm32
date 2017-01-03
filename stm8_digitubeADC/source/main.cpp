@@ -41,7 +41,7 @@ int main()
       //STM8_DigitubeDriver::displayFloat(1.234);
       //ADC1->CR1 |= ADC1_CR1_ADON;
 
-      Delayms(300);
+      Delayms(600);
       ADC1->CR1 |= ADC1_CR1_ADON;
 
 

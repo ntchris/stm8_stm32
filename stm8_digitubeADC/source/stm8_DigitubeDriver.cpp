@@ -218,20 +218,9 @@ INTERRUPT_HANDLER(TIM4_UPD_OVF_IRQHandler, 23)
 {
    // clear interrupt flag otherwise it reenter this again and again
    TIM4->SR1 = (uint8_t) (~TIM4_IT_UPDATE);
-   static bool isReady = true;
-
-   if (!isReady)
-   {
-      //last process is NOT ready yet ???
-
-      return;
-   }
-
-   isReady = false;
 
    STM8_DigitubeDriver::stm8_TIM4_Interrupt();
-   isReady = true;
-}
+ }
 
 inline void STM8_DigitubeDriver::stm8_Gpio_Write_Low(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins)
 {
@@ -820,6 +809,11 @@ void floatToString(float f, char *str, int maxLen)
       strcat(str, ".");
    }
 
+   // append a 0 if the float part has only one digit, ie  5.07,  so float part is 7, must append a 0 before 7, otherwise we have 5.7
+   if(floatPart_2_digits<10)
+   {
+      strcat(str, "0");
+   }
    strcat(str, strF);
    trim(str);
 }
@@ -938,7 +932,7 @@ float ADC1_GetConversionValue(void)
       temph = (uint16_t) (templ | (uint16_t) (temph << (uint8_t) 8));
    }
 
-   float fvalue = temph * 3.263 / 1024.0;
+   float fvalue = temph * 3.3 / 1024.0;
    uint8_t ADC1_FLAG_EOC = (uint8_t) 0x80; /**< EOC falg */
    //clear EOC bit
    ADC1->CSR &= (uint8_t) (~ADC1_FLAG_EOC);
@@ -963,13 +957,14 @@ void STM8_DigitubeDriver::displayADC(void)
 
 INTERRUPT_HANDLER(ADC1_EOC_IRQHandler, 22)
 {
-   uint8_t ADC1_FLAG_EOC = (uint8_t) 0x80; /**< EOC falg */
+   uint8_t ADC1_FLAG_EOC = (uint8_t) 0x80;  //EOC falg //
    float adcValue = 0.0;
    adcValue = ADC1_GetConversionValue();
    float voltageResult = VoltageTime * adcValue;
 
    //  STM8_DigitubeDriver::displayFloat(voltageResult);
 
+   //STM8_DigitubeDriver::displayVoltage(voltageResult);
    STM8_DigitubeDriver::displayVoltage(voltageResult);
 
    ADC1->CSR &= (uint8_t) (~ADC1_FLAG_EOC);

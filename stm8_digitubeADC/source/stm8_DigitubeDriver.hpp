@@ -26,12 +26,13 @@
 // Let's only allow 24V input, so 24/8=3.0 for stm8.
 // use 68k + 10k to divide the input voltage
 
-
+// let's measure max 26V, so 26/3.3=7.8, so (R1+R2 )/R2=7.878
+// R1=24K  R2=3.3k
 //stm8 can only accept 3.3v input as ADC source, to increase the voltage range, must divide the voltage using 2 R
 //30K
-#define R1VCheck 30000.0
+#define R1VCheck 23770.0
 //3.6K
-#define R2VGround 3600.0
+#define R2VGround 3300.0
 #define VoltageTime  (R1VCheck+R2VGround) / R2VGround
 // so the ADC result must times VoltageTime
 
