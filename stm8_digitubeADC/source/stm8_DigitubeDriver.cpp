@@ -802,7 +802,7 @@ void floatToString(float f, char *str, int maxLen)
    int floatPart_2_digits;
    floatPart_2_digits = int((f - intPart) * 100);
 
-   if (floatPart_2_digits > 0)
+   //if (floatPart_2_digits > 0)
    {
 
       intToString(floatPart_2_digits, strF, MaxFloatDigits + 1);
@@ -962,10 +962,9 @@ INTERRUPT_HANDLER(ADC1_EOC_IRQHandler, 22)
    adcValue = ADC1_GetConversionValue();
    float voltageResult = VoltageTime * adcValue;
 
-   //  STM8_DigitubeDriver::displayFloat(voltageResult);
 
-   //STM8_DigitubeDriver::displayVoltage(voltageResult);
    STM8_DigitubeDriver::displayVoltage(voltageResult);
+   //STM8_DigitubeDriver::displayVoltage(0);
 
    ADC1->CSR &= (uint8_t) (~ADC1_FLAG_EOC);
 
