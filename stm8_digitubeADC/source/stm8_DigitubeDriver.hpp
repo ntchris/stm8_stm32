@@ -51,46 +51,55 @@ typedef enum
    GPIO_PIN_ALL = ((uint8_t) 0xFF) /*!< All pins selected */
 } GPIO_Pin_TypeDef;
 
-#define Segment_A_Port  GPIOD    //  stm8 pin 2
-#define Segment_A_Pin   GPIO_PIN_5
 
-#define Segment_B_Port  GPIOC
-#define Segment_B_Pin   GPIO_PIN_7   // 17
+// stm8  pin definition
 
-#define Segment_C_Port  GPIOC
-#define Segment_C_Pin   GPIO_PIN_3   // 13
+#define Segment_A_Port  GPIOC    //  stm8 pin 2       // new pin 17   PC7
+#define Segment_A_Pin   GPIO_PIN_7
 
-#define Segment_D_Port  GPIOA     //6
-#define Segment_D_Pin   GPIO_PIN_2
+#define Segment_B_Port  GPIOA
+#define Segment_B_Pin   GPIO_PIN_1   // 17           // new pin 5   PA1
 
-#define Segment_E_Port  GPIOA    // 10
-#define Segment_E_Pin   GPIO_PIN_3
+#define Segment_C_Port  GPIOD
+#define Segment_C_Pin   GPIO_PIN_6   // 13             //new pin 3   PD6
 
-#define Segment_F_Port  GPIOD   // 3
+#define Segment_D_Port  GPIOC     //6                   // new pin 13   PC3
+#define Segment_D_Pin   GPIO_PIN_3
+
+#define Segment_E_Port  GPIOC    // 10                 //    new pin 14  PC4
+#define Segment_E_Pin   GPIO_PIN_4
+
+#define Segment_F_Port  GPIOC   // 3             //  new pin 16     PC6
 #define Segment_F_Pin   GPIO_PIN_6
 
-#define Segment_G_Port  GPIOC   // 14
-#define Segment_G_Pin   GPIO_PIN_4
+#define Segment_G_Port  GPIOA   // 14         //  new pin 6   PA2
+#define Segment_G_Pin   GPIO_PIN_2
 
-#define Segment_Dp_Port  GPIOA    // 5
-#define Segment_Dp_Pin   GPIO_PIN_1
+#define Segment_Dp_Port  GPIOC    // 5          //new pin 15   PC5
+#define Segment_Dp_Pin   GPIO_PIN_5
 
-#define Segment_Digit1_Port  GPIOD      // stm8 pin 1
-#define Segment_Digit1_Pin   GPIO_PIN_4
+#define Segment_Digit1_Port  GPIOD      // stm8 pin 1     // new pin 20  PD3
+#define Segment_Digit1_Pin   GPIO_PIN_3
 
-#define Segment_Digit2_Port  GPIOB    //12
+#define Segment_Digit2_Port  GPIOD    //12          //  new pin 1   PD4
 #define Segment_Digit2_Pin   GPIO_PIN_4
 
-#define Segment_Digit3_Port  GPIOB
+#define Segment_Digit3_Port  GPIOD                     //new pin 2   PD5
 #define Segment_Digit3_Pin   GPIO_PIN_5   //11
 
-#define Segment_Digit4_Port  GPIOD   // 19
-#define Segment_Digit4_Pin   GPIO_PIN_2
+#define Segment_Digit4_Port  GPIOA   // 19             //new pin 10   PA3
+#define Segment_Digit4_Pin   GPIO_PIN_3
 
-#define ADC_Port  GPIOD     //20
-#define ADC_Pin   GPIO_PIN_3
+#define ADC_Port  GPIOD     //20                   // new pin 19   PD2
+#define ADC_Pin   GPIO_PIN_2
 
-#define AdcChannel (uint8_t)0x04
+
+
+
+
+
+
+#define AdcChannel (uint8_t)0x03
 
 typedef enum
 {
@@ -178,9 +187,11 @@ class STM8_DigitubeDriver
    static bool checkIfOverflow(const char* str);
    static void adcInit(void);
 
+   static bool adcNotReady;
 public:
 
    static void stm8_TIM4_Interrupt(void);
+   static void stm8_ADC_Interrupt(void);
    static void stm8_init(void);
 
    static void displayInt(int num);
@@ -193,7 +204,7 @@ public:
    static void displayVoltage(float f);
    static void displayCurrent(float f);
    static void displayADC(void);
-
+   static void startADC(void);
 
 
 };

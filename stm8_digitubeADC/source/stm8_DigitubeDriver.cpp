@@ -41,6 +41,8 @@ char STM8_DigitubeDriver::displayBuffer[MAX_DIGIT_COUNT] =
 bool STM8_DigitubeDriver::displayBufferDot[MAX_DIGIT_COUNT] =
 { false, false, false, false }; // add one for ending 0
 
+bool STM8_DigitubeDriver::adcNotReady = false;
+
 #define TIM4_IT_UPDATE      ((uint8_t)0x01)
 
 inline void STM8_DigitubeDriver::tim4_Interupt_Init(void)
@@ -220,7 +222,7 @@ INTERRUPT_HANDLER(TIM4_UPD_OVF_IRQHandler, 23)
    TIM4->SR1 = (uint8_t) (~TIM4_IT_UPDATE);
 
    STM8_DigitubeDriver::stm8_TIM4_Interrupt();
- }
+}
 
 inline void STM8_DigitubeDriver::stm8_Gpio_Write_Low(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins)
 {
@@ -810,7 +812,7 @@ void floatToString(float f, char *str, int maxLen)
    }
 
    // append a 0 if the float part has only one digit, ie  5.07,  so float part is 7, must append a 0 before 7, otherwise we have 5.7
-   if(floatPart_2_digits<10)
+   if (floatPart_2_digits < 10)
    {
       strcat(str, "0");
    }
@@ -943,30 +945,47 @@ float ADC1_GetConversionValue(void)
 
 void STM8_DigitubeDriver::displayADC(void)
 {
-/*
-   //disable ADC now
-   uint8_t ADC1_FLAG_EOC = (uint8_t) 0x80; //  < EOC falg
+   /*
+    //disable ADC now
+    uint8_t ADC1_FLAG_EOC = (uint8_t) 0x80; //  < EOC falg
 
-   float adcValue = 0;
-   adcValue = ADC1_GetConversionValue();
+    float adcValue = 0;
+    adcValue = ADC1_GetConversionValue();
 
-   STM8_DigitubeDriver::displayFloat(adcValue);
-   // clear end of conversion bit
-*/
+    STM8_DigitubeDriver::displayFloat(adcValue);
+    // clear end of conversion bit
+    */
 }
 
 INTERRUPT_HANDLER(ADC1_EOC_IRQHandler, 22)
+{
+   STM8_DigitubeDriver::stm8_ADC_Interrupt();
+}
+
+inline void STM8_DigitubeDriver::stm8_ADC_Interrupt(void)
 {
    uint8_t ADC1_FLAG_EOC = (uint8_t) 0x80;  //EOC falg //
    float adcValue = 0.0;
    adcValue = ADC1_GetConversionValue();
    float voltageResult = VoltageTime * adcValue;
 
-
    STM8_DigitubeDriver::displayVoltage(voltageResult);
-   //STM8_DigitubeDriver::displayVoltage(0);
 
    ADC1->CSR &= (uint8_t) (~ADC1_FLAG_EOC);
+   //It's ready
+   STM8_DigitubeDriver::adcNotReady = false;
+}
+
+void STM8_DigitubeDriver::startADC(void)
+{
+   if (STM8_DigitubeDriver::adcNotReady)
+   {
+      return;
+
+   }
+   // it's ready
+   STM8_DigitubeDriver::adcNotReady = true;
+   ADC1->CR1 |= ADC1_CR1_ADON;
 
 }
 

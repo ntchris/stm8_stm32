@@ -37,13 +37,12 @@ int main()
 
    while (true)
    {
-     // STM8_DigitubeDriver::displayADC();
-      //STM8_DigitubeDriver::displayFloat(1.234);
+      //STM8_DigitubeDriver::displayFloat(1.234); // missing seg G
+
       //ADC1->CR1 |= ADC1_CR1_ADON;
-
+      //STM8_DigitubeDriver::setDisplayBufferOverflow();
       Delayms(600);
-      ADC1->CR1 |= ADC1_CR1_ADON;
-
+      STM8_DigitubeDriver::startADC();
 
    };
 
