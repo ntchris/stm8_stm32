@@ -51,43 +51,43 @@ typedef enum
    GPIO_PIN_ALL = ((uint8_t) 0xFF) /*!< All pins selected */
 } GPIO_Pin_TypeDef;
 
-#define Segment_A_Port  GPIOD
+#define Segment_A_Port  GPIOD    //  stm8 pin 2
 #define Segment_A_Pin   GPIO_PIN_5
 
 #define Segment_B_Port  GPIOC
-#define Segment_B_Pin   GPIO_PIN_7
+#define Segment_B_Pin   GPIO_PIN_7   // 17
 
 #define Segment_C_Port  GPIOC
-#define Segment_C_Pin   GPIO_PIN_3
+#define Segment_C_Pin   GPIO_PIN_3   // 13
 
-#define Segment_D_Port  GPIOA
+#define Segment_D_Port  GPIOA     //6
 #define Segment_D_Pin   GPIO_PIN_2
 
-#define Segment_E_Port  GPIOA
+#define Segment_E_Port  GPIOA    // 10
 #define Segment_E_Pin   GPIO_PIN_3
 
-#define Segment_F_Port  GPIOD
+#define Segment_F_Port  GPIOD   // 3
 #define Segment_F_Pin   GPIO_PIN_6
 
-#define Segment_G_Port  GPIOC
+#define Segment_G_Port  GPIOC   // 14
 #define Segment_G_Pin   GPIO_PIN_4
 
-#define Segment_Dp_Port  GPIOA
+#define Segment_Dp_Port  GPIOA    // 5
 #define Segment_Dp_Pin   GPIO_PIN_1
 
-#define Segment_Digit1_Port  GPIOD
+#define Segment_Digit1_Port  GPIOD      // stm8 pin 1
 #define Segment_Digit1_Pin   GPIO_PIN_4
 
-#define Segment_Digit2_Port  GPIOB
+#define Segment_Digit2_Port  GPIOB    //12
 #define Segment_Digit2_Pin   GPIO_PIN_4
 
 #define Segment_Digit3_Port  GPIOB
-#define Segment_Digit3_Pin   GPIO_PIN_5
+#define Segment_Digit3_Pin   GPIO_PIN_5   //11
 
-#define Segment_Digit4_Port  GPIOD
+#define Segment_Digit4_Port  GPIOD   // 19
 #define Segment_Digit4_Pin   GPIO_PIN_2
 
-#define ADC_Port  GPIOD
+#define ADC_Port  GPIOD     //20
 #define ADC_Pin   GPIO_PIN_3
 
 #define AdcChannel (uint8_t)0x04
@@ -193,6 +193,8 @@ public:
    static void displayVoltage(float f);
    static void displayCurrent(float f);
    static void displayADC(void);
+
+
 
 };
 
