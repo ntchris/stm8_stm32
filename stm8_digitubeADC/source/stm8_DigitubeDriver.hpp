@@ -54,43 +54,43 @@ typedef enum
 //========================================================================
 // stm8  pin definition
 
-#define Segment_A_Port  GPIOC    //  stm8 pin 2       // new pin 17   PC7
+#define Segment_A_Port  GPIOC           // new pin 17   PC7
 #define Segment_A_Pin   GPIO_PIN_7
 
-#define Segment_B_Port  GPIOA
-#define Segment_B_Pin   GPIO_PIN_1   // 17           // new pin 5   PA1
+#define Segment_B_Port  GPIOD
+#define Segment_B_Pin   GPIO_PIN_6           //new pin 3   PD6
 
-#define Segment_C_Port  GPIOD
-#define Segment_C_Pin   GPIO_PIN_6   // 13             //new pin 3   PD6
+#define Segment_C_Port  GPIOA
+#define Segment_C_Pin   GPIO_PIN_1          // new pin 5   PA1
 
-#define Segment_D_Port  GPIOC     //6                   // new pin 13   PC3
+#define Segment_D_Port  GPIOC                 // new pin 13   PC3
 #define Segment_D_Pin   GPIO_PIN_3
 
-#define Segment_E_Port  GPIOC    // 10                 //    new pin 14  PC4
+#define Segment_E_Port  GPIOC              //    new pin 14  PC4
 #define Segment_E_Pin   GPIO_PIN_4
 
-#define Segment_F_Port  GPIOC   // 3             //  new pin 16     PC6
+#define Segment_F_Port  GPIOC               //  new pin 16     PC6
 #define Segment_F_Pin   GPIO_PIN_6
 
-#define Segment_G_Port  GPIOA   // 14         //  new pin 6   PA2
+#define Segment_G_Port  GPIOA            //  new pin 6   PA2
 #define Segment_G_Pin   GPIO_PIN_2
 
-#define Segment_Dp_Port  GPIOC    // 5          //new pin 15   PC5
+#define Segment_Dp_Port  GPIOC              //new pin 15   PC5
 #define Segment_Dp_Pin   GPIO_PIN_5
 
-#define Segment_Digit1_Port  GPIOD      // stm8 pin 1     // new pin 20  PD3
+#define Segment_Digit1_Port  GPIOD           // new pin 20  PD3
 #define Segment_Digit1_Pin   GPIO_PIN_3
 
-#define Segment_Digit2_Port  GPIOD    //12          //  new pin 1   PD4
+#define Segment_Digit2_Port  GPIOD              //  new pin 1   PD4
 #define Segment_Digit2_Pin   GPIO_PIN_4
 
-#define Segment_Digit3_Port  GPIOD                     //new pin 2   PD5
-#define Segment_Digit3_Pin   GPIO_PIN_5   //11
+#define Segment_Digit3_Port  GPIOD               //new pin 2   PD5
+#define Segment_Digit3_Pin   GPIO_PIN_5
 
-#define Segment_Digit4_Port  GPIOA   // 19             //new pin 10   PA3
+#define Segment_Digit4_Port  GPIOA               //new pin 10   PA3
 #define Segment_Digit4_Pin   GPIO_PIN_3
 
-#define ADC_Port  GPIOD     //20                   // new pin 19   PD2
+#define ADC_Port  GPIOD                     // new pin 19   PD2
 #define ADC_Pin   GPIO_PIN_2
 
 #define AdcChannel (uint8_t)0x03
