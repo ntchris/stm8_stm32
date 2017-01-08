@@ -897,7 +897,7 @@ void STM8_DigitubeDriver::adcInit(void)
    ADC1->CR1 &= (uint8_t) (~ADC1_CR1_SPSEL);
    /* Select the prescaler division factor according to ADC1_PrescalerSelection values */
    const uint8_t ADC1_PRESSEL_FCPU_D18 = (uint8_t) 0x70;
-   const uint8_t ADC1_PRESSEL_FCPU_D2 = (uint8_t) 0x00;
+//   const uint8_t ADC1_PRESSEL_FCPU_D2 = (uint8_t) 0x00;
    ADC1->CR1 |= (uint8_t) (ADC1_PRESSEL_FCPU_D18);
 
    // =====================================

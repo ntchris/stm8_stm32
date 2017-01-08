@@ -51,7 +51,7 @@ typedef enum
    GPIO_PIN_ALL = ((uint8_t) 0xFF) /*!< All pins selected */
 } GPIO_Pin_TypeDef;
 
-
+//========================================================================
 // stm8  pin definition
 
 #define Segment_A_Port  GPIOC    //  stm8 pin 2       // new pin 17   PC7
@@ -93,13 +93,9 @@ typedef enum
 #define ADC_Port  GPIOD     //20                   // new pin 19   PD2
 #define ADC_Pin   GPIO_PIN_2
 
-
-
-
-
-
-
 #define AdcChannel (uint8_t)0x03
+
+//========================================================================
 
 typedef enum
 {
@@ -205,7 +201,6 @@ public:
    static void displayCurrent(float f);
    static void displayADC(void);
    static void startADC(void);
-
 
 };
 
