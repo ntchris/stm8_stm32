@@ -6,32 +6,43 @@
   <configuration>
     <name>Debug</name>
     <outputs>
-      <file>$TOOLKIT_DIR$\lib\dlstm8mln.a</file>
-      <file>$PROJ_DIR$\Debug\List\stm8DigitubeADC.map</file>
-      <file>$TOOLKIT_DIR$\config\lnkstm8s103f3.icf</file>
-      <file>$TOOLKIT_DIR$\inc\c\intrinsics.h</file>
-      <file>$PROJ_DIR$\Debug\Exe\stm8DigitubeADC.out</file>
-      <file>$PROJ_DIR$\source\stm8_DigitubeDriver.hpp</file>
-      <file>$PROJ_DIR$\Debug\Obj\stm8DigitubeADC.pbd</file>
-      <file>$PROJ_DIR$\source\main.cpp</file>
-      <file>$PROJ_DIR$\Debug\Obj\main.__cstat.et</file>
-      <file>$PROJ_DIR$\stm8_DigitubeDriver.cpp</file>
-      <file>$PROJ_DIR$\main.cpp</file>
       <file>$PROJ_DIR$\Debug\Obj\stm8_DigitubeDriver.__cstat.et</file>
-      <file>$PROJ_DIR$\Debug\Obj\stm8_DigitubeDriver.o</file>
-      <file>$PROJ_DIR$\Debug\Obj\stm8_DigitubeDriver.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm8DigitubeADC.pbd</file>
+      <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
+      <file>$PROJ_DIR$\source\stm8_DigitubeDriver.hpp</file>
+      <file>$PROJ_DIR$\Debug\Obj\main.__cstat.et</file>
+      <file>$PROJ_DIR$\Debug\Exe\stm8DigitubeADC.out</file>
+      <file>$TOOLKIT_DIR$\lib\dlstm8mln.a</file>
+      <file>$TOOLKIT_DIR$\inc\c\intrinsics.h</file>
       <file>$PROJ_DIR$\source\stm8_DigitubeDriver.cpp</file>
+      <file>$PROJ_DIR$\Debug\List\stm8DigitubeADC.map</file>
+      <file>$TOOLKIT_DIR$\lib\dlstm8mln.h</file>
       <file>$TOOLKIT_DIR$\lib\dbgstm8mld.a</file>
-      <file>$PROJ_DIR$\Debug\Obj\main.pbi</file>
-      <file>$PROJ_DIR$\Debug\Obj\main.o</file>
+      <file>$PROJ_DIR$\source\main.cpp</file>
       <file>$PROJ_DIR$\source\stm8s.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\main.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\main.o</file>
+      <file>$TOOLKIT_DIR$\inc\c\ysizet.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\string.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ystdio.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm8_DigitubeDriver.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
+      <file>$PROJ_DIR$\stm8_DigitubeDriver.cpp</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm8_DigitubeDriver.o</file>
+      <file>$TOOLKIT_DIR$\config\lnkstm8s103f3.icf</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Defaults.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdio.h</file>
+      <file>$PROJ_DIR$\main.cpp</file>
     </outputs>
     <file>
       <name>[ROOT_NODE]</name>
       <outputs>
         <tool>
           <name>ILINK</name>
-          <file> 4 1</file>
+          <file> 6 10</file>
         </tool>
       </outputs>
     </file>
@@ -40,13 +51,40 @@
       <outputs>
         <tool>
           <name>ILINK</name>
-          <file> 1</file>
+          <file> 10</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>ILINK</name>
-          <file> 2 17 12 0 15</file>
+          <file> 26 17 25 7 12</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\source\stm8_DigitubeDriver.cpp</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 22</file>
+        </tool>
+        <tool>
+          <name>ICCSTM8</name>
+          <file> 25</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 0</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 18 19 20 27 11 28 14 8 3 16 4 2 23 21</file>
+        </tool>
+        <tool>
+          <name>ICCSTM8</name>
+          <file> 4 14 8 19 20 2 27 11 16 23 3 18 28 21</file>
         </tool>
       </inputs>
     </file>
@@ -55,7 +93,7 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 16</file>
+          <file> 15</file>
         </tool>
         <tool>
           <name>ICCSTM8</name>
@@ -63,17 +101,17 @@
         </tool>
         <tool>
           <name>__cstat</name>
-          <file> 8</file>
+          <file> 5</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 18 3</file>
+          <file> 3 14 8 20 16 2 19 18 27 11 4 23</file>
         </tool>
         <tool>
           <name>ICCSTM8</name>
-          <file> 18 3</file>
+          <file> 4 14 8 19 20 2 27 11 16 23 3 18</file>
         </tool>
       </inputs>
     </file>
@@ -82,15 +120,15 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 13</file>
+          <file> 22</file>
         </tool>
         <tool>
           <name>ICCSTM8</name>
-          <file> 12</file>
+          <file> 25</file>
         </tool>
         <tool>
           <name>__cstat</name>
-          <file> 11</file>
+          <file> 0</file>
         </tool>
       </outputs>
     </file>
@@ -99,7 +137,7 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 16</file>
+          <file> 15</file>
         </tool>
         <tool>
           <name>ICCSTM8</name>
@@ -107,36 +145,9 @@
         </tool>
         <tool>
           <name>__cstat</name>
-          <file> 8</file>
+          <file> 5</file>
         </tool>
       </outputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\source\stm8_DigitubeDriver.cpp</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 13</file>
-        </tool>
-        <tool>
-          <name>ICCSTM8</name>
-          <file> 12</file>
-        </tool>
-        <tool>
-          <name>__cstat</name>
-          <file> 11</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 3 18 5</file>
-        </tool>
-        <tool>
-          <name>ICCSTM8</name>
-          <file> 5 18 3</file>
-        </tool>
-      </inputs>
     </file>
     <forcedrebuild>
       <name>$PROJ_DIR$\stm8_DigitubeDriver.cpp</name>
