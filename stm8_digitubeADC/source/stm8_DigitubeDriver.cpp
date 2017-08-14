@@ -934,7 +934,7 @@ float ADC1_GetConversionValue(void)
       temph = (uint16_t) (templ | (uint16_t) (temph << (uint8_t) 8));
    }
 
-   float fvalue = temph * 3.3 / 1024.0;
+   float fvalue = temph * 3.3 / 1023.0;
    uint8_t ADC1_FLAG_EOC = (uint8_t) 0x80; /**< EOC falg */
    //clear EOC bit
    ADC1->CSR &= (uint8_t) (~ADC1_FLAG_EOC);

@@ -2,22 +2,24 @@
  *  Work with Common Cathode 7 Seg digitube
  *
  *  Stm8 Pin configuration
- *  Seven Segment DigiTube Pin# and Def    STM8 PIN
+ *
+ *  Seven Segment DigiTube Pin# and Def  |   STM8 PINs
  *  -----------------------------------------------
- *    11   Seg A                             PD5
- *    7    Seg B                             PC7
- *    4    Seg C                             PC3
- *    2    Seg D                             PA2
- *    1    Seg E                             PA3
- *    10   Seg F                             PD6
- *    5    Seg G                             PC4
- *    3    Seg Dp (dot)                      PA1
- *    12   Digit1  (Common Cathode)          PD4    (Low = ON , High = OFF )
- *    9    Digit2  (Common Cathode)          PB4    (Low = ON , High = OFF )
- *    8    Digit3  (Common Cathode)          PB5    (Low = ON , High = OFF )
- *    6    Digit4  (Common Cathode)          PD2    (Low = ON , High = OFF )
- *
- *
+ *    11   Seg A                             PC7   17
+ *    7    Seg B                             PD6    3
+ *    4    Seg C                             PA1    5
+ *    2    Seg D                             PC3   13
+ *    1    Seg E                             PC4   14
+ *    10   Seg F                             PC6   16
+ *    5    Seg G                             PA2    6
+ *    3    Seg Dp (dot)                      PC5   15
+ *    12   Digit1  (Common Cathode)          PD3   20    (Low = ON , High = OFF )
+ *    9    Digit2  (Common Cathode)          PD4    1    (Low = ON , High = OFF )
+ *    8    Digit3  (Common Cathode)          PD5    2    (Low = ON , High = OFF )
+ *    6    Digit4  (Common Cathode)          PA3   10    (Low = ON , High = OFF )
+ *    ADC                                    PD2   19
+ *    NOT USED in this app                   PB4   12    I2C_SCL 
+ *    NOT USED in this app                   PB5   11    I2C_SDA
  */
 #include "stm8s.h"
 #include <string.h>
@@ -30,7 +32,7 @@
 // R1=24K  R2=3.3k
 //stm8 can only accept 3.3v input as ADC source, to increase the voltage range, must divide the voltage using 2 R
 //30K
-#define R1VCheck 23770.0
+#define R1VCheck 24000.0
 //3.6K
 #define R2VGround 3300.0
 #define VoltageTime  (R1VCheck+R2VGround) / R2VGround
