@@ -35,7 +35,7 @@ void Delayms(unsigned int ms);
 
 int main()
 {
-   int loopIntervalms = 100;
+   int loopIntervalms = 20;
    int MaxHaltTimeSecond = 60.0 * (1000.0 / loopIntervalms); // 60sec sleep ?
 
    STM8_DigitubeDriver::stm8_init();

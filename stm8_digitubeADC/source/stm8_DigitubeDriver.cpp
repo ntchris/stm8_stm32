@@ -920,7 +920,7 @@ void STM8_DigitubeDriver::adcInit(void)
 
 }
 
-
+/*
 float adc_compensate(float adcv)
 {
 	//unfortunately the adc value is not accurate, 
@@ -937,6 +937,8 @@ float adc_compensate(float adcv)
 	}
     return compensatedAdc;
 }
+*/
+
 
 float ADC1_GetConversionValue(void)
 {
@@ -956,7 +958,7 @@ float ADC1_GetConversionValue(void)
 
    float fvalue = temph * 3.3 / 1023.0;
    
-   fvalue = adc_compensate(fvalue);
+   //fvalue = adc_compensate(fvalue);
    
    uint8_t ADC1_FLAG_EOC = (uint8_t) 0x80; /**< EOC falg */
    //clear EOC bit
@@ -1020,7 +1022,7 @@ inline void processAdcInfo(float voltageResult)
    static float voltageToDisplay=0;
    static int currentIndex=0;
 
-   const int MAX_AVG = 40;
+   const int MAX_AVG = 60;
    
    static float avg[MAX_AVG];
    
