@@ -32,11 +32,24 @@
 // R1=24K  R2=3.3k
 //stm8 can only accept 3.3v input as ADC source, to increase the voltage range, must divide the voltage using 2 R
 //30K
-#define R1VCheck 24000.0
+//#define R1VCheck 24000.0
 //3.6K
-#define R2VGround 3300.0
-#define VoltageTime  (R1VCheck+R2VGround) / R2VGround
+//#define R2VGround 3300.0
+
+// 8.2727
+
 // so the ADC result must times VoltageTime
+
+// improving the ADC
+// assume max voltage accept is 20V,  so 20V/3.2V=6.25times
+// (R1VCheck+R2VGND) / R2VGnd=6.25
+// R2VGND=5.1K ,  so R1VCheck= 26.775
+
+const float R2VGround = 5110.0;
+//const float R1VCheck = 27000.0;
+const float R1VCheck = 27300.0;
+const float VoltageTime = (R1VCheck+R2VGround) / R2VGround;
+
 
 typedef enum
 {

@@ -35,13 +35,19 @@ void Delayms(unsigned int ms);
 
 int main()
 {
-   int loopIntervalms = 600;
-   int MaxHaltTimeSecond = 25 * 1000 / loopIntervalms; // 50*600=30sec sleep
+   int loopIntervalms = 100;
+   int MaxHaltTimeSecond = 60.0 * (1000.0 / loopIntervalms); // 60sec sleep ?
 
    STM8_DigitubeDriver::stm8_init();
    Delayms(loopIntervalms);
 
    int haltCounter = 0;
+
+   // allow some init time for ADC and capacitor to be stable
+   Delayms(200);
+
+   STM8_DigitubeDriver::displayString("....");
+
    while (true)
    {
       haltCounter++;

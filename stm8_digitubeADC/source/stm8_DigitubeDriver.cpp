@@ -837,13 +837,15 @@ void STM8_DigitubeDriver::displayFloat(float f)
 
 }
 
-void STM8_DigitubeDriver::displayVoltage(float v)
+void STM8_DigitubeDriver::displayVoltage(float volt)
 {
    const int stringSize = 3 * MAX_DIGIT_COUNT;
    char string[stringSize];
 
-   floatToString(v, string, MAX_DIGIT_COUNT - 1);
-   strcat(string, "V");
+   
+   floatToString(volt, string, MAX_DIGIT_COUNT);
+   //strcat(string, "V");
+   
    STM8_DigitubeDriver::displayString(string);
 }
 
@@ -918,6 +920,24 @@ void STM8_DigitubeDriver::adcInit(void)
 
 }
 
+
+float adc_compensate(float adcv)
+{
+	//unfortunately the adc value is not accurate, 
+	//with the current resistors:
+	//12.5V input, actual adc input  1.99V , adc measured 1.72  (less  1.99-1.72=0.27V)
+	//4.15V input, actual adc line input 0.65V, adc measure 0.65 (the same)
+	//3.26V input, actual adc line input 0.51V, measure 0.495
+ 	float delta=(adcv-0.63);
+	
+	float compensatedAdc=adcv;
+	if( delta>0) 
+	{ 
+      compensatedAdc = delta /1.72*0.33 + adcv;
+	}
+    return compensatedAdc;
+}
+
 float ADC1_GetConversionValue(void)
 {
 
@@ -931,10 +951,13 @@ float ADC1_GetConversionValue(void)
       /* Then read MSB */
       temph = ADC1->DRH;
 
-      temph = (uint16_t) (templ | (uint16_t) (temph << (uint8_t) 8));
+      temph = (uint16_t) (templ | (uint16_t) (temph << (uint8_t)8));
    }
 
    float fvalue = temph * 3.3 / 1023.0;
+   
+   fvalue = adc_compensate(fvalue);
+   
    uint8_t ADC1_FLAG_EOC = (uint8_t) 0x80; /**< EOC falg */
    //clear EOC bit
    ADC1->CSR &= (uint8_t) (~ADC1_FLAG_EOC);
@@ -957,20 +980,100 @@ void STM8_DigitubeDriver::displayADC(void)
     */
 }
 
+
+// return current battery percent for this 12V type battery.
+float getBattery12VPercent( float voltage)
+{
+	const float minV=11.6, fullV =13.15;
+	//11.6V means 0%,  13.15V meas full
+	
+	if (voltage >= fullV ) 
+	{
+	  return 100;
+	}
+	
+	if (voltage <= minV ) 
+	{
+	  return 0;
+	}
+	
+	
+	float percent = (voltage-minV)/(fullV-minV) *100;
+	int percentInt=percent;
+	return percentInt;
+	
+}
+
 INTERRUPT_HANDLER(ADC1_EOC_IRQHandler, 22)
 {
    STM8_DigitubeDriver::stm8_ADC_Interrupt();
 }
 
+
+//average, and display voltage, and percentage!
+inline void processAdcInfo(float voltageResult)
+{
+	
+	
+   static bool switchVolt_Percent=true;
+
+   static float voltageToDisplay=0;
+   static int currentIndex=0;
+
+   const int MAX_AVG = 40;
+   
+   static float avg[MAX_AVG];
+   
+   
+   avg[currentIndex] = voltageResult;
+   currentIndex++;
+   
+   //have enough values to do average.
+   if(currentIndex>=MAX_AVG)
+   {
+	   currentIndex=0;
+	   float avgValue=0;
+       for(int i=0;i<MAX_AVG;i++)
+       {
+	      avgValue= avg[i]+avgValue;
+       }
+	   //avg value ready, update the voltageToDisplay
+       voltageToDisplay=avgValue/MAX_AVG;
+	  
+       //now we have a new value to display	  
+   }  // 
+   else if(currentIndex==(MAX_AVG/2))
+   {
+	  //the firs time enter here, voltage avg value is not ready. dont show
+	  if( voltageToDisplay >0) 
+      { 
+         if(switchVolt_Percent)
+        { 
+           STM8_DigitubeDriver::displayFloat(voltageToDisplay);
+        }
+	     else
+        {
+           int percent = getBattery12VPercent(voltageToDisplay);
+           STM8_DigitubeDriver::displayInt(percent);
+        }
+        switchVolt_Percent=!switchVolt_Percent;
+	  }
+   }
+   
+}
+
 inline void STM8_DigitubeDriver::stm8_ADC_Interrupt(void)
 {
+   
    uint8_t ADC1_FLAG_EOC = (uint8_t) 0x80;  //EOC falg //
    float adcValue = 0.0;
    adcValue = ADC1_GetConversionValue();
    float voltageResult = VoltageTime * adcValue;
+   //debug STM8_DigitubeDriver::displayVoltage(adcValue);
 
-   STM8_DigitubeDriver::displayVoltage(voltageResult);
-
+   //STM8_DigitubeDriver::displayFloat(voltageResult);
+   processAdcInfo(voltageResult);
+   
    ADC1->CSR &= (uint8_t) (~ADC1_FLAG_EOC);
    //It's ready
    STM8_DigitubeDriver::adcNotReady = false;
@@ -988,4 +1091,5 @@ void STM8_DigitubeDriver::startADC(void)
    ADC1->CR1 |= ADC1_CR1_ADON;
 
 }
+
 

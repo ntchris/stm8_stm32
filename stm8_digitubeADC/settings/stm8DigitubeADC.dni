@@ -38,7 +38,7 @@ ShowSource=1
 [Simulator]
 Freq=16000000
 [DebugChecksum]
-Checksum=2096696069
+Checksum=1217787347
 [CallStack]
 ShowArgs=0
 [Disassembly]
@@ -47,14 +47,6 @@ MixedMode=1
 LogEnabled=0
 GraphEnabled=0
 ShowTimeLog=1
-[Breakpoints]
-Bp0=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.779.1" 0 0 0 0 "" 0 ""
-Bp1=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.779.1" 0 0 0 0 "" 0 ""
-Bp2=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.779.1" 0 0 0 0 "" 0 ""
-Bp3=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.708.4" 0 0 0 0 "" 0 ""
-Bp4=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.974.4" 0 0 0 0 "" 0 ""
-Bp5=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.974.4" 0 0 0 0 "" 0 ""
-Count=6
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
@@ -62,8 +54,19 @@ Category=_ 0
 [TermIOLog]
 LoggingEnabled=_ 0
 LogFile=_ ""
+[SfrWindow]
+Show=1 1
+Sort=4 0
+[Breakpoints]
+Bp0=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.779.1" 0 0 0 0 "" 0 ""
+Bp1=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.779.1" 0 0 0 0 "" 0 ""
+Bp2=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.779.1" 0 0 0 0 "" 0 ""
+Bp3=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.708.4" 0 0 0 0 "" 0 ""
+Bp4=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.1009.4" 0 0 0 0 "" 0 ""
+Bp5=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.1009.4" 0 0 0 0 "" 0 ""
+Count=6
 [Aliases]
 Count=0
 SuppressDialog=0
 [DebuggerSettings]
-DisableInterruptsWhenStepping=0
+DisableInterruptsWhenStepping=1
