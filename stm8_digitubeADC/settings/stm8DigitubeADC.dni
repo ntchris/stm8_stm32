@@ -38,7 +38,7 @@ ShowSource=1
 [Simulator]
 Freq=16000000
 [DebugChecksum]
-Checksum=1217787347
+Checksum=672717586
 [CallStack]
 ShowArgs=0
 [Disassembly]
@@ -62,8 +62,8 @@ Bp0=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.779.1" 0 0 0 0 "" 
 Bp1=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.779.1" 0 0 0 0 "" 0 ""
 Bp2=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.779.1" 0 0 0 0 "" 0 ""
 Bp3=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.708.4" 0 0 0 0 "" 0 ""
-Bp4=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.1009.4" 0 0 0 0 "" 0 ""
-Bp5=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.1009.4" 0 0 0 0 "" 0 ""
+Bp4=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.1011.4" 0 0 0 0 "" 0 ""
+Bp5=_ "STD_CODE" "{$PROJ_DIR$\source\stm8_DigitubeDriver.cpp}.1011.4" 0 0 0 0 "" 0 ""
 Count=6
 [Aliases]
 Count=0
