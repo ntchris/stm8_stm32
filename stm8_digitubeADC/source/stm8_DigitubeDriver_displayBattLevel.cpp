@@ -1017,12 +1017,12 @@ inline void processAdcInfo(float voltageResult)
 {
 	
 	
-   static bool switchVolt_Percent=false;
+   static bool switchVolt_Percent=true;
 
    static float voltageToDisplay=0;
    static int currentIndex=0;
 
-   const int MAX_AVG = 10;
+   const int MAX_AVG = 60;
    
    static float avg[MAX_AVG];
    
@@ -1049,16 +1049,16 @@ inline void processAdcInfo(float voltageResult)
 	  //the firs time enter here, voltage avg value is not ready. dont show
 	  if( voltageToDisplay >0) 
       { 
-         //if(switchVolt_Percent)
+         if(switchVolt_Percent)
         { 
            STM8_DigitubeDriver::displayFloat(voltageToDisplay);
         }
-	     //else
+	     else
         {
-          // int percent = getBattery12VPercent(voltageToDisplay);
-          // STM8_DigitubeDriver::displayInt(percent);
+           int percent = getBattery12VPercent(voltageToDisplay);
+           STM8_DigitubeDriver::displayInt(percent);
         }
-        //switchVolt_Percent=!switchVolt_Percent;
+        switchVolt_Percent=!switchVolt_Percent;
 	  }
    }
    
