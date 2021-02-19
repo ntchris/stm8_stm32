@@ -1,0 +1,24 @@
+1. For weak MCU like AT51 series, use Common Anode 7 Segments Digitube
+
+Dig1-2-3-4 :  use PNP transistor for each, to provide V+ (active high -- so common anode) for all segments abcdef,
+each segments use active low to sink to turn on (low to on)
+Reason:  only using PNP transistor can provide V+ for all segments.
+
+If using Common cathode:
+   Dig1-2-3-4 use direct sink or NPN,  and each segments abcdef must use active high (not likely possible for a weak MCU!)
+   
+   
+2. For more powerful MCU like STM8, can use common Cathode :
+Dig1-2-3-4: direct connect, use Active Low to enable, it's sink so provide V- sink for all segments should be fine.
+Each segement abcdef use high to enable.
+
+If use common anode :
+Dig1-2-3-4: direct connect, use Active high to enable ( for common anode), but it may not be powerful enough to provide V+ power for all segments!
+
+TM1637 IC:  use common anode
+TM1638  IC: use common cathode, but also support common anode 
+TM1639  IC: use common cathode, but also support common anode 
+
+
+
+
