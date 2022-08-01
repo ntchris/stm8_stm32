@@ -60,3 +60,11 @@ Temporary Items
 *.list
 *.cout
 .metadata
+
+# stm32cubeIDE
+*.d
+*.Drivers
+Debug
+*.s
+CMSIS
+Drivers
