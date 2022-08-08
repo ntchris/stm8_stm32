@@ -152,7 +152,7 @@ float adc_val_to_temp(uint16_t adc_data) {
 
 	float adc_voltage = __LL_ADC_CALC_DATA_TO_VOLTAGE(adc_data, Vref, LL_ADC_RESOLUTION_12B)/1000.0f;
 	// float adc_vol = adc_val_to_voltage(adc_val);
-	//float temp = (adc_voltage - V25) / AVG_Slope + 25;
+	float temp = (adc_voltage - V25) / AVG_Slope + 25;
 
 	return temp;
 }
@@ -189,9 +189,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 // Called when first half of buffer is filled
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
-	//HAL_GPIO_WritePin(GPIOC, PIN_USER_LED_Pin, GPIO_PIN_SET);
-	//printf("HAL_ADC_ConvCpltCallback adc PA read  %hu\r\n",  adc_buf[0]);
-	//printf("HAL_ADC_ConvCpltCallback\n\r");
+
+	// if need to stop ADC from now on, call  HAL_ADC_Stop_DMA(&hadc1);
 	HAL_GPIO_WritePin(GPIOC, PIN_USER_LED_Pin, GPIO_PIN_RESET);
 	show_adc_buf();
 	HAL_GPIO_WritePin(GPIOC, PIN_USER_LED_Pin, GPIO_PIN_SET);
@@ -348,7 +347,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T2_TRGO;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc1.Init.NbrOfConversion = 4;
-  hadc1.Init.DMAContinuousRequests = ENABLE;
+  hadc1.Init.DMAContinuousRequests = DISABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
