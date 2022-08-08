@@ -1,8 +1,4 @@
 /* USER CODE BEGIN Header */
-
-// connect pin PA0 to GND, PA1 to half of 3.3V (10K and 10K), PA4 to 3.3V.
-// these are 3 external ADC input channels.
-// the internal temp sensor is the 4th ADC channel.
 /**
  ******************************************************************************
  * @file           : main.c
@@ -46,6 +42,8 @@
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
+TIM_HandleTypeDef htim2;
+
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
@@ -58,14 +56,13 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-/* Private function prototypes -----------------------------------------------*/
 #ifdef __GNUC__
 /* With GCC, small printf (option LD Linker->Libraries->Small printf
  set to 'Yes') calls __io_putchar() */
@@ -86,22 +83,9 @@ PUTCHAR_PROTOTYPE {
 #define ADC_BUF_LEN 4
 uint16_t adc_buf[ADC_BUF_LEN];
 
-// Called when first half of buffer is filled
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
-	//HAL_GPIO_WritePin(GPIOC, PIN_USER_LED_Pin, GPIO_PIN_SET);
-	//printf("HAL_ADC_ConvCpltCallback adc PA read  %hu\r\n",  adc_buf[0]);
-	//printf("HAL_ADC_ConvCpltCallback\n\r");
-	HAL_GPIO_WritePin(GPIOC, PIN_USER_LED_Pin, GPIO_PIN_RESET);
-	show_adc_buf();
-	HAL_GPIO_WritePin(GPIOC, PIN_USER_LED_Pin, GPIO_PIN_SET);
 
-}
 
-void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc) {
-	//HAL_GPIO_WritePin(GPIOC, PIN_USER_LED_Pin, GPIO_PIN_RESET);
-	//printf("HAL_ADC_ConvHalfCpltCallback adc PA  read  %hu\r\n",  adc_buf[0]);
 
-}
 
 // only PA0, PA1, PA4 is defined as adc input channel.
 // connect PA0 to GND, PA1 to mid point of 10K and 10K from 3.3V and GND, PA4 to 3.3V.
@@ -133,16 +117,15 @@ void select_ADC_Channel(uint32_t channel) {
 
 }
 
+
+
+
 float adc_val_to_voltage(uint16_t adc_val) {
-	float ADC_MAX = 4096.0;
+	float ADC_MAX = 4095.0;
 	float Vref = 3.3;
 	float adc_voltage = Vref * 1.0f * adc_val / ADC_MAX;
 	return adc_voltage;
 }
-
-
-
-
 
 /*
  void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
@@ -154,36 +137,72 @@ float adc_val_to_voltage(uint16_t adc_val) {
  }
  */
 
+
+float Vref = 3300;
+
 float adc_val_to_temp_sys(uint16_t adc_val) {
 
-	float Vref = 3300;
 	int temp = __LL_ADC_CALC_TEMPERATURE(Vref, adc_val, LL_ADC_RESOLUTION_12B);
 	return temp;
 
 }
 
-
-
-float adc_val_to_temp(uint16_t adc_val) {
+float adc_val_to_temp(uint16_t adc_data) {
 	const float V25 = 0.76, AVG_Slope = 0.002f;
 
-	float adc_vol = adc_val_to_voltage(adc_val);
-	float temp = (adc_vol - V25) / AVG_Slope + 25;
+	float adc_voltage = __LL_ADC_CALC_DATA_TO_VOLTAGE(adc_data, Vref, LL_ADC_RESOLUTION_12B)/1000.0f;
+	// float adc_vol = adc_val_to_voltage(adc_val);
+	//float temp = (adc_voltage - V25) / AVG_Slope + 25;
+
 	return temp;
 }
 
 void show_adc_buf() {
 
 	uint16_t temp_adc_val = adc_buf[3];
-	// float temp = adc_val_to_temp(temp_adc_val );
-	float temp = adc_val_to_temp(temp_adc_val );
+
+	float temp = adc_val_to_temp(temp_adc_val);
 	printf(" adc value: %u %u %u  %u  , temp: %.1f\n\r", adc_buf[0], adc_buf[1],
 			adc_buf[2], adc_buf[3], temp);
-	HAL_GPIO_WritePin(PIN_USER_LED_GPIO_Port, PIN_USER_LED_Pin, GPIO_PIN_SET);
 
 }
 
 
+// Callback: timer has rolled over
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+
+	// nothing happens here???
+	printf("zzz");
+	HAL_GPIO_TogglePin(PIN_USER_LED_GPIO_Port, PIN_USER_LED_Pin);
+
+	// Check which version of the timer triggered this callback and toggle LED
+	if (htim == &htim2) {
+		printf("tim2");
+
+	} else {
+		printf("other");
+	}
+
+}
+
+
+
+// Called when first half of buffer is filled
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
+	//HAL_GPIO_WritePin(GPIOC, PIN_USER_LED_Pin, GPIO_PIN_SET);
+	//printf("HAL_ADC_ConvCpltCallback adc PA read  %hu\r\n",  adc_buf[0]);
+	//printf("HAL_ADC_ConvCpltCallback\n\r");
+	HAL_GPIO_WritePin(GPIOC, PIN_USER_LED_Pin, GPIO_PIN_RESET);
+	show_adc_buf();
+	HAL_GPIO_WritePin(GPIOC, PIN_USER_LED_Pin, GPIO_PIN_SET);
+
+}
+
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc) {
+	//HAL_GPIO_WritePin(GPIOC, PIN_USER_LED_Pin, GPIO_PIN_RESET);
+	//printf("HAL_ADC_ConvHalfCpltCallback adc PA  read  %hu\r\n",  adc_buf[0]);
+
+}
 
 /* USER CODE END 0 */
 
@@ -194,7 +213,7 @@ void show_adc_buf() {
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	memset(adc_buf, 0, ADC_BUF_LEN);
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -218,42 +237,34 @@ int main(void)
   MX_DMA_Init();
   MX_ADC1_Init();
   MX_USART2_UART_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-	uint16_t *flashSizeF401Addr = (uint32_t*) 0x1FFF7A22;
-	uint16_t flashSize = *flashSizeF401Addr;
+
+  if ( HAL_OK!= HAL_ADC_Start_DMA(&hadc1, (uint16_t*) adc_buf, ADC_BUF_LEN))
+  	{
+         Error_Handler();
+  	}
+
+  // adc must start first to receive timer interrupt.
+  if   ( HAL_ADC_Start_IT(&hadc1)  != HAL_OK )
+  {
+	  Error_Handler();
+  }
+
+	if (HAL_TIM_Base_Start(&htim2) != HAL_OK) {
+		Error_Handler();
+	};
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	int channel = 0;
-	if ( HAL_OK!= HAL_ADC_Start_DMA(&hadc1, (uint16_t*) adc_buf, ADC_BUF_LEN))
-	{
-       Error_Handler();
-	}
-	HAL_GPIO_WritePin(PIN_USER_LED_GPIO_Port, PIN_USER_LED_Pin, GPIO_PIN_SET);
-	printf("about to while(1)\r\n");
-	while (1) {
+  while (1)
+  {
 
-//printf("adc PA %i  read  %hu\r\n", channel, adc_buf[0]);
-
-		// can also use USB as virtual com port to print: CDC_Transmit_FS((uint8_t *) "Hello World CDC !\n", 13); //We add this line for serial comm
-		//HAL_GPIO_WritePin(PIN_USER_LED_GPIO_Port, PIN_USER_LED_Pin, GPIO_PIN_RESET);
-
+		int timer_val = __HAL_TIM_GET_COUNTER(&htim2);
+		printf("timer is %u\n\r", timer_val);
 		HAL_Delay(1000);
-		//uint16_t temp_adc_val = adc_buf[3];
-		/*float temp = 0;
-		const float V25 = 0.76, AVG_Slope = 0.002f;
-
-		float adc_vol = adc_val_to_voltage(temp_adc_val);
-		temp = (adc_vol - V25) / AVG_Slope + 25;
-		*/
-		//float temp = adc_val_to_temp(temp_adc_val);
-		//printf(" adc value: %u %u %u  %u  , temp: %.1f\n\r", adc_buf[0],
-		//		adc_buf[1], adc_buf[2], adc_buf[3], temp);
-
-		//HAL_GPIO_WritePin(PIN_USER_LED_GPIO_Port, PIN_USER_LED_Pin,GPIO_PIN_SET);
-		HAL_Delay(1000);
-		//channel++;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -331,10 +342,10 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = ENABLE;
-  hadc1.Init.ContinuousConvMode = ENABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
-  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
+  hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T2_TRGO;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc1.Init.NbrOfConversion = 4;
   hadc1.Init.DMAContinuousRequests = ENABLE;
@@ -384,6 +395,51 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 39999;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 3999;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
 
 }
 
@@ -473,7 +529,7 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
-	printf("error handler");
+	printf("error_handler()");
 	__disable_irq();
 	while (1) {
 	}
