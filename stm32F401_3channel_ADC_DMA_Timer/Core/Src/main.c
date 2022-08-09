@@ -80,6 +80,13 @@ PUTCHAR_PROTOTYPE {
 	return ch;
 }
 
+
+// ADC complete callback only fire after the whole buffer is done
+// if ADC once convert 4, then it takes 25times of the timer
+// if each timer is 2 seconds, then it need 25timesX2sec = 50seconds to fill the whole 100 buffer.
+//#define ADC_BUF_LEN 100
+
+
 #define ADC_BUF_LEN 4
 uint16_t adc_buf[ADC_BUF_LEN];
 
@@ -186,8 +193,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 }
 
 
-
-// Called when first half of buffer is filled
+// ADC_BUF_LEN 4
+// call back when the whole buffer is filled.
+// if ADC convert length is 4, buffer is 4, then each timer has one call back.
+// if buffer is larger than the ADC convert length, it takes multiple timer.
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
 
 	// if need to stop ADC from now on, call  HAL_ADC_Stop_DMA(&hadc1);
@@ -347,7 +356,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T2_TRGO;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc1.Init.NbrOfConversion = 4;
-  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.DMAContinuousRequests = ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
