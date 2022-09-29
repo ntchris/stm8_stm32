@@ -56,5 +56,16 @@ uint8_t u8x8_byte_3wire_hw_spi(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void 
     case U8X8_MSG_BYTE_SEND:
         HAL_SPI_Transmit(&LCD_SPI, (uint8_t*) arg_ptr, arg_int, 10000);
 		
-		
+
+about speed:
+without DMA, just using HAL_SPI_Transmit()
+each call takes about 43ms,  screen refresh rate is about 16-17FPS.
+Bluepill is working on 72MHZ ,  SPI speed setting is about 562K (bottle neck)
+// SPI prescaler 64  ( when bluepill is running 72MHZ )
+// 8X9
+// baudrate =562KB is ok  FPS=17
+
+If lower bluepill speed a little, SPI prescaler can be 32, so SPI speed can be higher, so FPS can be about 22
+
+
 		
