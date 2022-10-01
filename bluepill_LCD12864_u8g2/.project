@@ -30,11 +30,4 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 		<nature>org.eclipse.cdt.core.ccnature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>u8g2</name>
-			<type>2</type>
-			<location>E:/GitHubRoot/stm8_stm32/libs/u8g2-master/csrc</location>
-		</link>
-	</linkedResources>
 </projectDescription>

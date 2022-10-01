@@ -3,13 +3,13 @@ A few key items list:
 
 dev board: stm32F103C8T6 blue pill
 API u8g2, LCD communication: hardware SPI
-LCD: LCD12864 ST7920  , a regular one, 5V version.
+LCD: LCD12864 ST7920  , a regular one, 5V version works, 3.3v should work better.
 It works with STM32 bluepill device (which is 3.3V )
 
 HW connection:
 To make it less dangerous I lower the 5V supply to LCD be 4.8V and also use a diode to further lower the power to LCD by 0.7V.
 so the 3.3V SPI signal should be better for a 4.2V powered LCD.
-
+print to usart2 ( RX2 PA3)
 
 Always disconnect LCD power first, then disconnect stm32 later. because
 AN4899
