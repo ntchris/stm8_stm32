@@ -78,16 +78,14 @@ PUTCHAR_PROTOTYPE {
     return ch;
 }
 
-// 1000ns = 1us
-// delay < 500nanos is meaningless because the time is really toooo short.
-// this is OK, about 500nanos.
-void delay_500nanos(uint8_t n_500ns) {
 
-    for (uint8_t i = 0; i < 2 * n_500ns; i++) {
-        __NOP();
+#define delay_100nanosec()  __NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();
+#define delay_200nanosec()   delay_100nanosec(); delay_100nanosec();
+#define delay_300nanosec()   delay_100nanosec(); delay_200nanosec();
+#define delay_400nanosec()   delay_200nanosec(); delay_200nanosec();
+#define delay_500nanosec()   delay_200nanosec(); delay_300nanosec();
+#define delay_1000nanosec()   delay_500nanosec(); delay_500nanosec();
 
-    }
-}
 
 // tested with bluepill @ 72MHz, with oscilloscope,  very accurate
 // 1000us = 1ms
@@ -118,7 +116,7 @@ void MY_HAL_GPIO_WritePin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin, GPIO_PinState 
     }
 }
 
-void test_delay_100nanos() {
+void test_delay_100nanosec() {
     while (1) {
         // without any nop or delay,  high 650ns, low 650ns
         //HAL_GPIO_WritePin(PROBE_GPIO_Port, PROBE_Pin, GPIO_PIN_SET);
@@ -147,13 +145,12 @@ void test_delay_100nanos() {
 
 void test_delay_500nanos() {
     while (1) {
+        GPIOA->BSRR = PROBE_Pin; // Set the Pin PA8
+        GPIOA->BSRR  = (uint32_t) PROBE_Pin << 16u;;  // Set the Pin PA8 RESET
 
         GPIOA->BSRR = PROBE_Pin; // Set the Pin PA8
-        // no __NOP(): use 250ns
-        // 5 __NOP(): use 300ns
-        //  __NOP();
-        // asm("NOP");
-        delay_500nanos(1);
+
+        delay_500nanosec( );
         GPIOA->BSRR  = (uint32_t) PROBE_Pin << 16u;;  // Set the Pin PA8 RESET
 
 
