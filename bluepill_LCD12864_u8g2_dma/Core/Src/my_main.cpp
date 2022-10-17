@@ -4,7 +4,7 @@
 #include <stdio.h>   // for printf
  #include "u8g2.h"
 
-extern u8g2_t u8g2;
+
 
 void setup_u8g2_stm32();
 void draw_test_screen(uint16_t fps);
@@ -63,7 +63,7 @@ int my_main(void) {
                frame_count = 0;
                start_ts = HAL_GetTick();
         }
-
+        HAL_Delay(20);
 
     }
 
