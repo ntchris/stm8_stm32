@@ -43,7 +43,7 @@ extern "C" int my_main(void) {
     HAL_Delay(500);
     rgbled.rgb_led_on(255, 255, 255 );
     HAL_Delay(500);
-
+    //rgbled.self_test_3_different_color();
     //rgbled.rgb_led_on(100, 100, 30 );
     //rgbled.self_test_keep_sending_0_code();
     //rgbled.self_test_keep_sending_1_code();
@@ -60,7 +60,7 @@ extern "C" int my_main(void) {
 
         //rgbled.self_test_keep_changing_color();
         //rgbled.rgb_led_on(128 , 128, 128 );
-        rgbled.self_test_all();
+     rgbled.self_test_all();
 
 
 

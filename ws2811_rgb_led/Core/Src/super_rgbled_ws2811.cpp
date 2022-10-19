@@ -123,11 +123,11 @@ void Super_RgbLed_WS2811::self_test_keep_sending_OFF_000000() {
 }
 void Super_RgbLed_WS2811::self_test_3_different_color() {
 
-    set_color_one_led(0, 0,0,255);
-    set_color_one_led(1, 0,255,0);
-    set_color_one_led(2, 255,0,0);
+    set_color_one_led(0, 240,140,140);
+    set_color_one_led(1, 20,188,20);
+    set_color_one_led(2, 20,20,120);
     send_rgb_data_to_led();
-
+/*
     HAL_Delay(600);
 
     for (int i=0;i<255;i++)
@@ -141,7 +141,7 @@ void Super_RgbLed_WS2811::self_test_3_different_color() {
     send_rgb_data_to_led();
     HAL_Delay(50);
     }
-
+*/
 }
 
 void Super_RgbLed_WS2811::self_test_all()
@@ -180,7 +180,7 @@ inline void Super_RgbLed_WS2811::send_0_code_to_ic() {
     //  T0L 0 code, low voltage time 580ns~1us
     // cannot use HAL_GPIO, too slow.
 
-    GPIOA->BSRR = RGB_DATA_Pin; // Set the Pin PA8
+    this->_gpio_port->BSRR = this->_gpio_pin; // Set the Pin PA8
     // test 0  no delay at all, works,   from rise to starts to drop 110nanos. drop to 70% of low, 200nanos.
 
     // test 1 from rise to starts to drop: 220ns,   drop to 70% of low 270ns
@@ -193,7 +193,7 @@ inline void Super_RgbLed_WS2811::send_0_code_to_ic() {
     // delay_300nano();  // works but maybe too long.  ( < 380ns )
 
     //GPIOA->BSRR = (uint32_t) RGB_DATA_Pin << 16u;
-    GPIOA->BSRR = this->_pin_unset;
+    this->_gpio_port->BSRR = this->_pin_unset;
     // due to other overhead, this delay need to be shorter.
     // without any delay, low is 420nanosec, so we need about 200-400nanosec more
 
