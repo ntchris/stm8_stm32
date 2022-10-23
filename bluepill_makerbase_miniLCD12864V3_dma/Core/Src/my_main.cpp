@@ -76,8 +76,7 @@ extern "C" int my_main(void) {
     const uint16_t time_count = 2000;
     uint16_t fps = 0;
     start_ts = HAL_GetTick();
-    my_u8g2.draw_test_screen(fps);
-    end_ts = HAL_GetTick();
+
 
 
     while (1) {
