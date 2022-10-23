@@ -83,8 +83,8 @@ extern "C" int my_main(void) {
     while (1) {
 
        my_u8g2.draw_test_screen(fps);
-       HAL_Delay(20);   // no delay , 36FPS ,  delay(20),  21FPS
-       // using DMA  26FPS
+       HAL_Delay(20);   // no dma no delay , 36FPS ,  delay(20),  21FPS
+       // delay(20) and using DMA  26FPS
 
 
         frame_count++;

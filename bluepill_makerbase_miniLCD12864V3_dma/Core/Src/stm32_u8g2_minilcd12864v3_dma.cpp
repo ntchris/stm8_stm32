@@ -41,37 +41,74 @@ DMA_BUFFER::DMA_BUFFER() {
     send_counter = 0;
     dma_working = false;
 }
-bool DMA_BUFFER::add_packet(DMA_DATA_PACKET *packet_p) {
+
+// combine same DC packets
+bool DMA_BUFFER::add_packet_combine(DMA_DATA_PACKET *packet_p) {
+    static uint8_t prev_dc = 99;
+    static Buffer_Length_Type *prev_len_p = 0;
     uint16_t new_size = get_packet_size(packet_p);
     if ((store_counter + new_size) >= BUFFER_SIZE_MAX) {
         return false;
     }
+    if (packet_p->dc != prev_dc) {
+        // new / different DC
+
+        uint8_t *current_p = &data_buffer[store_counter];
+        memcpy(current_p, &packet_p->dc, sizeof(packet_p->dc));
+        store_counter += sizeof(packet_p->dc);
+        // pointing to len
+        current_p = &data_buffer[store_counter];
+        prev_len_p = (Buffer_Length_Type*) current_p;
+        // set the length
+        //memcpy(current_p, &packet_p->len, sizeof(packet_p->len));
+        *prev_len_p = packet_p->len;
+        store_counter += sizeof(Buffer_Length_Type);
+        prev_dc = packet_p->dc;
+
+    } else {
+        // same dc ,  we combine the data, adjust the previous length only
+#ifdef OVER_CAUCIOUS
+        // this could slow things down
+        if (sizeof(Buffer_Length_Type) == 1) {
+            uint16_t temp = packet_p->len + *prev_len_p;
+
+            if (temp > 255) {
+                printf("fatal error, buffer len data type is too small, so it's overflowed\n\r");
+                return false;
+            }
+        }
+#endif
+        *prev_len_p += packet_p->len;
+
+    }
+    // add the new data to buffer
+    //printf("new len %u\n\r", *prev_len_p);
     uint8_t *current_p = &data_buffer[store_counter];
-    memcpy(current_p, &packet_p->dc, sizeof(packet_p->dc));
-    store_counter += sizeof(packet_p->dc);
-    current_p = &data_buffer[store_counter];
-    memcpy(current_p, &packet_p->len, sizeof(packet_p->len));
-    store_counter += sizeof(packet_p->len);
-    current_p = &data_buffer[store_counter];
     memcpy(current_p, packet_p->p, packet_p->len);
     store_counter += packet_p->len;
     return true;
-
 }
 
 /*
- inline bool U8G2_ST7567_128X64_F_STM32_HW_SPI_DMA::check_buffer_has_enough_free_space(uint8_t new_data_size) {
-
+ bool DMA_BUFFER::add_packet(DMA_DATA_PACKET *packet_p) {
+ uint16_t new_size = get_packet_size(packet_p);
+ if ((store_counter + new_size) >= BUFFER_SIZE_MAX) {
+ return false;
+ }
+ uint8_t *current_p = &data_buffer[store_counter];
+ memcpy(current_p, &packet_p->dc, sizeof(packet_p->dc));
+ store_counter += sizeof(packet_p->dc);
+ current_p = &data_buffer[store_counter];
+ memcpy(current_p, &packet_p->len, sizeof(packet_p->len));
+ store_counter += sizeof(packet_p->len);
+ current_p = &data_buffer[store_counter];
+ memcpy(current_p, packet_p->p, packet_p->len);
+ store_counter += packet_p->len;
+ return true;
 
  }
  */
-inline void U8G2_ST7567_128X64_F_STM32_HW_SPI_DMA::store_data_to_buffer(uint8_t dc, void *data_p, uint16_t len) {
-    DMA_DATA_PACKET p;
-    p.dc = dc;
-    p.p = data_p;
-    p.len = len;
-    dma_buffer.add_packet(&p);
-}
+
 
 uint8_t U8G2_ST7567_128X64_F_STM32_HW_SPI_DMA::u8x8_stm32_gpio_and_delay_cb(U8X8_UNUSED u8x8_t *u8x8,
 U8X8_UNUSED uint8_t msg, U8X8_UNUSED uint8_t arg_int,
@@ -110,7 +147,7 @@ U8X8_UNUSED void *arg_ptr) {
     return 1;
 }
 
-void U8G2_ST7567_128X64_F_STM32_HW_SPI_DMA::stm32_spi_txCpltCallback(SPI_HandleTypeDef *hspi) {
+inline void U8G2_ST7567_128X64_F_STM32_HW_SPI_DMA::stm32_spi_txCpltCallback(SPI_HandleTypeDef *hspi) {
     send_packet_to_dma();
 
 }
@@ -147,7 +184,7 @@ void U8G2_ST7567_128X64_F_STM32_HW_SPI_DMA::send_packet_to_dma() {
     static uint8_t prev_dc = 9;
     uint8_t dc = dma_buffer.data_buffer[dma_buffer.send_counter];
     dma_buffer.send_counter += sizeof(dc);
-    uint8_t len = dma_buffer.data_buffer[dma_buffer.send_counter];
+    Buffer_Length_Type len = dma_buffer.data_buffer[dma_buffer.send_counter];
     dma_buffer.send_counter += sizeof(len);
 
     if (len == 0) {
@@ -167,13 +204,15 @@ void U8G2_ST7567_128X64_F_STM32_HW_SPI_DMA::send_packet_to_dma() {
 
 inline void U8G2_ST7567_128X64_F_STM32_HW_SPI_DMA::send_buffer_to_stm32_spi_dc_dma() {
     while (dma_buffer.dma_working) {
+        printf("send_buffer_to_stm32_spi_dc_dma() waiting dma\n\r");
 
     }
-    _dma_start_ts = HAL_GetTick();
 
     while (HAL_SPI_STATE_READY != HAL_SPI_GetState(g_lcd_spi)) {
         printf("spi still busy\n\r");
     }
+    _dma_start_ts = HAL_GetTick();
+
     dma_buffer.dma_working = true;
     send_packet_to_dma();
 
@@ -188,37 +227,22 @@ inline void U8G2_ST7567_128X64_F_STM32_HW_SPI_DMA::cache_spi_data_and_dc_to_buff
     p.len = arg_int;
 
     while (dma_buffer.dma_working) {
-        printf("waiting dma\n\r");
+        printf("cache_spi_data_and_dc_to_buffer_for_dma_u8g2_cb() waiting dma\n\r");
     };
 
-    bool add_ok = dma_buffer.add_packet(&p);
+    bool add_ok = dma_buffer.add_packet_combine(&p);
     if (add_ok) {
 #ifdef DEBUG_PRINT
-        printf("add dc %u, size %u ok, counter now %u\n\r", dc, p.len, dma_buffer.store_counter);
+       // printf("add dc %u, size %u ok, counter now %u\n\r", dc, p.len, dma_buffer.store_counter);
 #endif
         return;
     } else {
-        printf("buffer full!! has %u, need add %u\n\r", dma_buffer.store_counter, p.len);
+        printf("fatal error, buffer full!! has %u, need add %u\n\r", dma_buffer.store_counter, p.len);
+        while(1);
     }
 }
 
-//printf("cache %u \n\r", arg_int);
-// when DMA is still sending the buffer, don't modify the buffer with new data.
 
-// when buffer is full, we cannot store more,
-// DMA is not working now ( see above code, we are here only because DMA is not working),
-// we have to send everything we have now.
-/*
- if (!check_buffer_has_enough_free_space(arg_int)) {
- #ifdef DEBUG_PRINT
- printf("buffer full!! waiting...\r\n");
- #endif
- send_buffer_to_stm32_spi_dc_dma();
- while (!U8G2_ST7567_128X64_F_STM32_HW_SPI_DMA::check_buffer_has_enough_free_space(arg_int)) {
- // we just sent it using DMA, now wait for it to finish and free up the buffer room
- __NOP();
- }
- }*/
 // buffer is not full and has enough space to store new data
 //store_data_to_buffer(arg_ptr, arg_int);
 uint8_t U8G2_ST7567_128X64_F_STM32_HW_SPI_DMA::u8x8_byte_4wire_hw_spi(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int,
@@ -242,18 +266,6 @@ uint8_t U8G2_ST7567_128X64_F_STM32_HW_SPI_DMA::u8x8_byte_4wire_hw_spi(u8x8_t *u8
         // remember the dc, use it to call cache_spi_data function.
         dc = arg_int;
 
-        /*// this DC is for next
-         if (arg_int != _store_dc) {
-
-         // send
-         //printf("!dc:%u, sending\n\r", arg_int);
-         set_buffer_by_dc(arg_int);
-         _store_dc = arg_int;
-         send_buffer_to_stm32_spi_dc_dma();
-
-         }
-
-         */
         break;
     case U8X8_MSG_BYTE_START_TRANSFER:
 #ifdef LCD_CS
@@ -267,8 +279,7 @@ uint8_t U8G2_ST7567_128X64_F_STM32_HW_SPI_DMA::u8x8_byte_4wire_hw_spi(u8x8_t *u8
        HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, (GPIO_PinState) (u8x8->display_info->chip_disable_level));
        u8x8->gpio_and_delay_cb(u8x8, U8X8_MSG_DELAY_NANO, u8x8->display_info->post_chip_disable_wait_ns, NULL);
 #endif
-        //printf("end transf %u\n\r", count);
-        //count++;
+
         break;
     default:
         return 0;

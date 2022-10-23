@@ -1,6 +1,7 @@
 // to support u82g, LCD12864 ST7567 with STM32F103 (blue pill) and STM32F401 (Blackpill)
 // using DMA to do SPI data transfer to LCD screen.
-// st7567 is pretty fast already ( u8g2 send buffer only takes 8ms or 4ms , so DMA in my opinion is optional
+// st7567 is pretty fast already ( u8g2 send buffer only takes 8ms or 4ms (depends on SPI speed setting 2MBit or 1MBit)  ,
+// so DMA in my opinion is totally optional
 
 // LCD_RESET  may not be needed to connect to MCU, but it's very useful when debugging.
 // DC - Data Command Pin  is needed
@@ -48,16 +49,24 @@
 
 // [ packet1   dc0, len=10, 1234567890 ,   packet2 dc1, len=1, 1,  packet3 dc2, len=5, 12345  ]
 
+// the length data type we put in the buffer. so far I can see it's always <= 128.
+// but for other unknown type of larger screen  it's possible 255 can't hold.
+// for DC = command, data is always short.
+// for DC = data , it's always 128 and follow by a different DC. ( so they don't add up like 128 + 128 etc )
+typedef  uint8_t Buffer_Length_Type;
+// typedef  uint16_t Buffer_Length_Type;
 
 struct DMA_DATA_PACKET
 {
       uint8_t  dc;
       void *p;
+      // if we have larger single packet size > 255 (but not likely, u8g2 said something about 255 being the max size),
+      // this won't work, must change to uint16_t
       uint8_t len;
 };
 
 
-const static uint16_t BUFFER_SIZE_MAX = 1200;
+const static uint16_t BUFFER_SIZE_MAX = 1500;
 
 class DMA_BUFFER {
 public:
@@ -74,7 +83,9 @@ public:
 
    }
    // add ok true,  not ok false
-   bool  add_packet( DMA_DATA_PACKET *);
+  //  bool  add_packet( DMA_DATA_PACKET *);
+   bool add_packet_combine(DMA_DATA_PACKET *packet_p) ;
+
    // constructor
    DMA_BUFFER();
 
@@ -90,11 +101,10 @@ private:
      * */
 
     __IO static uint32_t _dma_start_ts;
-    //__IO  static DMA_BUFFER *buffer;
 
 
-    static bool check_buffer_has_enough_free_space(uint8_t new_data_size);
-    static inline void store_data_to_buffer(uint8_t dc, void *data_p, uint16_t len);
+    // send one packet from the buffer to DMA, one packet only. different packet has different DC - Data Command
+    // so they cannot be sent as one buffer.
     static void send_packet_to_dma();
 public:
 
@@ -115,10 +125,9 @@ public:
 
     inline static void cache_spi_data_and_dc_to_buffer_for_dma_u8g2_cb(uint8_t dc, void *arg_ptr,
             uint8_t arg_int) ;
-    static   void  stm32_spi_txCpltCallback(SPI_HandleTypeDef *hspi) ;
+    inline static   void  stm32_spi_txCpltCallback(SPI_HandleTypeDef *hspi) ;
 
-    static DMA_BUFFER *sending_buffer, *store_buffer;
-    static void set_buffer_by_dc(uint8_t dc);
+    // use our own sendBuffer() so we can control when to send DMA.
     void sendBuffer();
 };
 /*
