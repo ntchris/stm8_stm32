@@ -57,8 +57,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define BP_LED_Pin GPIO_PIN_13
-#define BP_LED_GPIO_Port GPIOC
 #define LCD_DC_Pin GPIO_PIN_14
 #define LCD_DC_GPIO_Port GPIOB
 #define LCD_RESET_Pin GPIO_PIN_11
@@ -71,6 +69,9 @@ void Error_Handler(void);
 #define BTN_ENC1_GPIO_Port GPIOB
 #define BTN_ENC_Pin GPIO_PIN_4
 #define BTN_ENC_GPIO_Port GPIOB
+#define BTN_ENC_EXTI_IRQn EXTI4_IRQn
+#define BUZZER_Pin GPIO_PIN_5
+#define BUZZER_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

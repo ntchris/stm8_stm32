@@ -68,7 +68,7 @@ public:
     SPI_HandleTypeDef * get_spi();
 
 
-    void draw_test_screen( uint16_t fps  ) ;
+    void draw_test_screen( uint8_t fps  ) ;
     void  setup_u8g2_stm32(   ) ;
 
 };
