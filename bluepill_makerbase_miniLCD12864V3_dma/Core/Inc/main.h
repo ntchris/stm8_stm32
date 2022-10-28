@@ -65,12 +65,6 @@ void Error_Handler(void);
 #define LCD_RESET_GPIO_Port GPIOA
 #define RGB_DATA_Pin GPIO_PIN_12
 #define RGB_DATA_GPIO_Port GPIOA
-#define BTN_ENC_Pin GPIO_PIN_15
-#define BTN_ENC_GPIO_Port GPIOA
-#define BTN_ENC1_Pin GPIO_PIN_3
-#define BTN_ENC1_GPIO_Port GPIOB
-#define BTN_ENC2_Pin GPIO_PIN_4
-#define BTN_ENC2_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

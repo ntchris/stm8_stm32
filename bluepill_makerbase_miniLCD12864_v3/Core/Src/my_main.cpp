@@ -225,7 +225,7 @@ extern "C" int my_main(void) {
 
     init_rotary_encoder();
 
-    uint8_t Default_RGB = 45;
+    uint8_t Default_RGB = 100;
     Item_Value mi_red = Item_Value("Red", Default_RGB, 2);
     Item_Value mi_green = Item_Value("Green", Default_RGB, 2);
     Item_Value mi_blue = Item_Value("Blue", Default_RGB, 2);

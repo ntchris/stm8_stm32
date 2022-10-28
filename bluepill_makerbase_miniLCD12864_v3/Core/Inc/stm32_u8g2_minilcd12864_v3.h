@@ -8,7 +8,7 @@
 
 // Pin Config --> RCC --> High Speed Clock (HSE) : Crystal/Ceremic Resonator
 
-// SPI settin
+// SPI setting
 
 // SPI:  transmit only master, NSS disable
 // SPI prescaler 64  ( when bluepill is running 72MHZ  // 8X9)
@@ -18,8 +18,10 @@
 // SPI prescaler 8, speed 4.5MBit/s  OK   45FPS
 
 
-// CPSA : 2 edge (important)
-// Clock Polarity , CPOL = HIGH or LOW both work
+// Clock Polarity , CPOL = LOW
+// CPSA : 1 edge
+// if choose incorrectly, LCD won't work when connect probe (multimeter or oscilloscope) to any NSS/CLK/Data pins
+
 
 #include <main.h>
 
