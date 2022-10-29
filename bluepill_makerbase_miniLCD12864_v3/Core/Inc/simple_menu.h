@@ -38,7 +38,12 @@ public:
 
     uint8_t decrease() {
 
-        if (_value >= _step) {
+        if ( _value < _step)
+        {
+            // cannot do value - step, negative.
+            _value = 0;
+        }else
+        {
             _value -= _step;
         }
         return _value;

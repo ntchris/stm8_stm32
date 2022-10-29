@@ -55,8 +55,9 @@ U8X8_UNUSED void *arg_ptr) {
     case U8X8_MSG_GPIO_DC:
 
         break;
-    case U8X8_MSG_GPIO_CS1: // Set the spi chip select line level. always low for st7567.
-        //HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin,  (GPIO_PinState)arg_int  );
+    case U8X8_MSG_GPIO_CS1:
+        // never gets called ??!
+        // printf("U8X8_MSG_GPIO_CS1 here!!!!\n\r");
         break;
     case U8X8_MSG_GPIO_RESET:
         HAL_GPIO_WritePin(LCD_RESET_GPIO_Port, LCD_RESET_Pin, (GPIO_PinState) arg_int);
@@ -65,65 +66,7 @@ U8X8_UNUSED void *arg_ptr) {
     return 1;
 }
 
-/*inline void U8G2_ST7567_128X64_F_STM32_HW_SPI::stm32_spi_txCpltCallback(SPI_HandleTypeDef *hspi) {
 
- #ifdef DEBUG_PRINT
- uint32_t dma_end_ts = HAL_GetTick();
-
- unsigned int time_dma_used_ms = dma_end_ts - this->_dma_start_ts;
-
- printf("dma sent %u bytes, used  %ums\n\r", this->_dma_send_buffer_counter, time_dma_used_ms);
- #endif
-
- this->_dma_send_buffer_counter = 0;
-
-
- }
- */
-/*
- // don't add inline for this
- void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
-
- //   u8g2.stm32_spi_txCpltCallback(hspi);
-
- }
- */
-
-/*
- inline void U8G2_ST7567_128X64_F_STM32_HW_SPI::store_data_to_buffer(void *data_p, uint16_t len) {
- memcpy(&(this->_dma_send_buffer[this->_dma_send_buffer_counter]), data_p, len);
- this->_dma_send_buffer_counter += len;
- }
-
-
- inline void cache_spi_data_to_buffer_for_dma_u8g2_callback(void *arg_ptr, uint8_t arg_int) {
-
- // when DMA is still sending the buffer, don't modify the buffer with new data.
- while (HAL_DMA_GetState( LCD_SPI.hdmatx) != HAL_DMA_STATE_READY) {
- #ifdef DEBUG_PRINT
- printf("DMA working on buffer, wait\n\r");
- #endif
- __NOP();
- }
-
- // when buffer is full, we cannot store more,
- // DMA is not working now ( see above code, we are here only because DMA is not working),
- // we have to send everything we have now.
- if ( !u8g2.check_buffer_has_enough_free_space(arg_int)) {
- #ifdef DEBUG_PRINT
- printf("buffer full!! waiting...\r\n");
- #endif
- u8g2.send_buffer_to_stm32_spi_dma();
- while(!u8g2.check_buffer_has_enough_free_space(arg_int))
- {
- // we just sent it using DMA, now wait for it to finish and free up the buffer room
- __NOP();
- }
- }
- // buffer is not full and has enough space to store new data
- u8g2.store_data_to_buffer(arg_ptr, arg_int);
- }
- */
 
 inline uint8_t u8x8_byte_4wire_hw_spi(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr) {
     switch (msg) {
@@ -160,16 +103,18 @@ inline uint8_t u8x8_byte_4wire_hw_spi(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int
     return 1;
 }
 
+/*
 void reset_lcd() {
     HAL_GPIO_WritePin(LCD_RESET_GPIO_Port, LCD_RESET_Pin, GPIO_PIN_RESET);
     HAL_Delay(200);
     HAL_GPIO_WritePin(LCD_RESET_GPIO_Port, LCD_RESET_Pin, GPIO_PIN_SET);
 
 }
+*/
 
 void U8G2_ST7567_128X64_F_STM32_HW_SPI::setup_u8g2_stm32() {
     // c style def   u8g2_Setup_st7920_s_128x64_f(&u8g2, U8G2_R0, u8x8_byte_3wire_hw_spi, u8x8_stm32_gpio_and_delay_cb);
-    reset_lcd();
+    // reset_lcd();
     this->initDisplay();
     this->setPowerSave(0);
     this->setContrast(150);

@@ -57,8 +57,13 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define LCD_DC_Pin GPIO_PIN_14
-#define LCD_DC_GPIO_Port GPIOB
+#define BUTTON_Pin GPIO_PIN_14
+#define BUTTON_GPIO_Port GPIOC
+#define BUTTON_EXTI_IRQn EXTI15_10_IRQn
+#define LCD_CS_Pin GPIO_PIN_12
+#define LCD_CS_GPIO_Port GPIOB
+#define LCD_DC_Pin GPIO_PIN_8
+#define LCD_DC_GPIO_Port GPIOA
 #define LCD_RESET_Pin GPIO_PIN_11
 #define LCD_RESET_GPIO_Port GPIOA
 #define RGB_DATA_Pin GPIO_PIN_12

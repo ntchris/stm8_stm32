@@ -86,6 +86,8 @@ Simple_Menu_Item_Value menu(&my_u8g2);
 
 static uint32_t g_start_time = 0;
 static uint16_t g_on_time = 0;
+__IO bool g_update_rgb;
+
 void beeper_on(uint16_t on_time = 100) {
 
     HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, GPIO_PIN_SET);
@@ -115,6 +117,14 @@ void check_and_turn_beeper_off() {
 
 }
 
+void get_rgb_from_menu_and_set_rgb() {
+    uint8_t r, g, b;
+    r = menu.get_menuitem_value(0);
+    g = menu.get_menuitem_value(1);
+    b = menu.get_menuitem_value(2);
+    set_lcd_backlight(r, g, b);
+}
+
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
     __IO static uint16_t old_value;
     // for encoder , note, the pins must be pull up internally or externally
@@ -130,10 +140,12 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
     if (g_value >= (STEP + old_value)) {
         old_value = g_value;
         menu.active_item_next();
-
+        g_update_rgb = true;
     } else if ((g_value + STEP) <= old_value) {
         old_value = g_value;
         menu.active_item_prev();
+        g_update_rgb = true;
+
     } else {
         // delta, +1, +2, +3, ignore.
 
@@ -141,12 +153,19 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 
 }
 
+
+
+
+
+
 // Rotary Encoder Button Click Handler
 // External Interrupt ISR Handler CallBackFun
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
     // debounce
     // can you press the button 10+ times in a second ?
     const uint8_t TIME_DELTA_DEBOUNCE = 90;
+    printf("interrupt GPIO is %u\n\r", GPIO_Pin);
+
     if (GPIO_Pin == BTN_ENC_Pin) {
 
         static uint32_t last_ts = 0;
@@ -163,6 +182,26 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
         // button handler put here
         menu.click_on_current_menu_item();
+
+    }else if(GPIO_Pin == BUTTON_Pin)
+    {
+
+        static uint32_t last_ts = 0;
+        uint32_t now_ts = HAL_GetTick();
+        if ((now_ts - last_ts) < TIME_DELTA_DEBOUNCE) {
+            last_ts = now_ts;
+            return;
+        }
+        // debounce done.
+
+        last_ts = now_ts;
+
+        beeper_on(100);
+        static uint8_t r=128, g=60, b=28;
+        r =~r;
+        g=r+g;
+        b=r+g+b;
+        set_lcd_backlight(r, g, b);
 
     }
 }
@@ -205,14 +244,6 @@ uint8_t get_fps() {
     return fps;
 }
 
-void get_rgb_from_menu_and_set_rgb() {
-    uint8_t r, g, b;
-    r = menu.get_menuitem_value(0);
-    g = menu.get_menuitem_value(1);
-    b = menu.get_menuitem_value(2);
-    set_lcd_backlight(r, g, b);
-}
-
 extern "C" int my_main(void) {
 
     printf("about to do main while()\n\r");
@@ -220,25 +251,22 @@ extern "C" int my_main(void) {
 
     my_u8g2.setup_u8g2_stm32();
 
-    // uint32_t start_ts = 0;
-    //uint32_t end_ts = 0;
-
     init_rotary_encoder();
 
-    uint8_t Default_RGB = 100;
+    uint8_t Default_RGB = 80;
     Item_Value mi_red = Item_Value("Red", Default_RGB, 2);
     Item_Value mi_green = Item_Value("Green", Default_RGB, 2);
     Item_Value mi_blue = Item_Value("Blue", Default_RGB, 2);
     menu.add_menu_item(&mi_red);
     menu.add_menu_item(&mi_green);
     menu.add_menu_item(&mi_blue);
+    rgbled.rgb_led_on(Default_RGB,Default_RGB,Default_RGB);
     menu.set_active_item(1);
     menu.set_font(u8g2_font_helvR08_tf, u8g2_font_ncenB08_tf);
     while (1) {
 
         check_and_turn_beeper_off();
 
-        get_rgb_from_menu_and_set_rgb();
         //   bool enc_btn = HAL_GPIO_ReadPin(BTN_ENC_GPIO_Port, BTN_ENC_Pin);
         uint8_t fps = get_fps();
 
@@ -255,6 +283,13 @@ extern "C" int my_main(void) {
         //test_menu_OK_CANCEL();
         // start_ts = HAL_GetTick();
         my_u8g2.sendBuffer();
+        if (g_update_rgb)
+        {
+            g_update_rgb = false;
+            get_rgb_from_menu_and_set_rgb();
+
+        }
+
         // end_ts = HAL_GetTick();
         // unsigned int delta_msec = end_ts - start_ts;
         // printf("sendbuffer used %u ms\r\n", delta_msec);
