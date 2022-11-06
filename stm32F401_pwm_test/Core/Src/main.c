@@ -81,7 +81,7 @@ PUTCHAR_PROTOTYPE {
 #define PWM_OUTPUT1 TIM_CHANNEL_3
 #define PWM_OUTPUT2 TIM_CHANNEL_4
 
-void set_pwm( uint16_t channel, uint8_t pwm )
+void set_pwm( uint16_t channel, uint16_t pwm )
 {
 
     // __HAL_TIM_SET_COMPARE
@@ -144,19 +144,15 @@ int main(void)
 
   HAL_TIM_PWM_Start(&TIMER_PWM, PWM_OUTPUT1);
   HAL_TIM_PWM_Start(&TIMER_PWM, PWM_OUTPUT2);
-  uint8_t pwm3 = 0, pwm4=255;
+  uint16_t pwm1 = 254, pwm2=255;
   while (1)
   {
-      pwm3++;
-      pwm4--;
-       set_pwm(TIM_CHANNEL_3 , pwm3 );
-       set_pwm(TIM_CHANNEL_4 , pwm4 );
-	   printf("LOW\n");
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7, GPIO_PIN_RESET);
-		HAL_Delay(20);
-		printf("HIGH\n");
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7, GPIO_PIN_SET);
-		HAL_Delay(20);
+      //pwm1++;
+      //pwm2--;
+       set_pwm(PWM_OUTPUT1 , pwm1 );
+       set_pwm(PWM_OUTPUT2 , pwm2 );
+
+		HAL_Delay(15);
 
     /* USER CODE END WHILE */
 
@@ -230,7 +226,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 333-1;
+  htim3.Init.Prescaler = 330-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 255-1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
